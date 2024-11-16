@@ -1,0 +1,51 @@
+# 用master分支内容覆盖远程分支的步骤
+
+## 方法一：使用VSCode界面
+1. 确保你在master分支上
+   - 点击左下角的分支名称
+   - 选择"master"或"main"分支
+
+2. 强制推送到目标分支
+   - 打开命令面板 (Cmd+Shift+P 或 Ctrl+Shift+P)
+   - 输入 "Git: Push to..."
+   - 选择远程仓库
+   - 输入目标分支名称（例如 feature/fix-chicken-sprite）
+   - 选择 "Force Push"
+
+## 方法二：使用Git命令（推荐）
+```bash
+# 1. 确保在master分支上
+git checkout master
+
+# 2. 获取最新的master内容
+git pull origin master
+
+# 3. 强制推送master内容到目标分支
+git push origin master:feature/fix-chicken-sprite -f
+```
+
+## 注意事项
+- `-f` 或 `--force` 表示强制推送，会覆盖远程分支的所有内容
+- 使用强制推送要谨慎，确保你真的想要放弃目标分支上的所有更改
+- 建议在强制推送前先备份目标分支的内容（如果需要的话）
+
+## 如果出现问题
+如果强制推送失败，可能需要：
+1. 确认你有足够的权限
+2. 检查分支保护设置
+3. 使用 `--force-with-lease` 代替 `-f` 以增加安全性：
+```bash
+git push origin master:feature/fix-chicken-sprite --force-with-lease
+```
+
+## 恢复方法
+如果误操作，可以通过以下步骤恢复：
+1. 找到目标分支的最后一个提交hash
+2. 使用 `git reset --hard <commit-hash>` 恢复
+3. 强制推送恢复的内容
+
+## 最佳实践
+- 在执行强制推送前，先确认你在正确的分支上
+- 确保本地master分支是最新的
+- 告知团队成员你要进行强制推送
+- 推送后验证远程分支的内容是否正确

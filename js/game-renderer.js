@@ -33,12 +33,11 @@ class GameRenderer {
             this.clear();
 
             // Draw video background
-            background.draw();
+            background.draw(this.ctx);
 
             // Draw game world if in MENU or PLAYING state
             if (gameState.isState('MENU') || gameState.isState('PLAYING')) {
                 // Apply camera transform
-                this.ctx.save();
                 camera.applyTransform(this.ctx);
 
                 // Draw platforms
@@ -72,23 +71,26 @@ class GameRenderer {
                     }
                 }
 
-                this.ctx.restore();
+                // Restore camera transform
+                camera.restoreTransform(this.ctx);
 
                 // Draw UI elements
-                ui.drawVolumeBar();
-                if (gameState.isState('PLAYING')) {
-                    ui.drawStats(gameState.gameTime, gameState.gameDistance);
+                if (ui) {
+                    ui.drawVolumeBar(this.ctx);
+                    if (gameState.isState('PLAYING')) {
+                        ui.drawStats(this.ctx, gameState.gameTime, gameState.gameDistance);
+                    }
                 }
             }
 
             // Draw messages based on game state
-            if (!gameState.isState('PLAYING')) {
+            if (!gameState.isState('PLAYING') && ui) {
                 const message = gameState.isState('MENU') ?
                     '点击开始游戏！\n用声音控制小鸡移动和跳跃' :
                     gameState.isState('WIN') ?
                         '恭喜过关！\n点击重新开始' :
                         '游戏结束\n点击重新开始';
-                ui.drawMessage(message, this.canvas.width/2, this.canvas.height/2);
+                ui.drawMessage(this.ctx, message, this.canvas.width/2, this.canvas.height/2);
             }
 
             // Draw debug info

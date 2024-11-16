@@ -2,11 +2,11 @@ class MovementController {
     constructor() {
         this.debug = document.getElementById('debug');
         
-        // Movement settings
-        this.baseSpeed = 300;        // Base speed
-        this.maxSpeed = 500;         // Max speed
-        this.acceleration = 0.25;    // Acceleration
-        this.deceleration = 0.85;    // Deceleration
+        // Movement settings - 增加速度
+        this.baseSpeed = 250;        // 提高基础速度
+        this.maxSpeed = 450;         // 提高最大速度
+        this.acceleration = 0.25;    // 提高加速度
+        this.deceleration = 0.9;     // 降低减速度，保持更长的动力
         
         // Jump settings - Adjusted for better response
         this.baseJumpForce = -450;    // Base jump force
@@ -24,24 +24,24 @@ class MovementController {
         this.facingRight = true;
         this.lastMoveTime = 0;
         
-        // Movement thresholds
-        this.moveThreshold = 0.05;    // Lower threshold for movement
-        this.jumpThreshold = 0.1;     // Lower threshold for jumps
-        this.sustainThreshold = 0.08;  // Threshold for sustaining jumps
+        // Movement thresholds - 降低阈值使更容易触发移动
+        this.moveThreshold = 0.1;     // 降低移动阈值
+        this.jumpThreshold = 0.15;    // 降低跳跃阈值
+        this.sustainThreshold = 0.1;   // 降低持续跳跃阈值
         
         // Input debouncing
         this.lastJumpTime = 0;
         this.jumpCooldown = 250;     // Jump cooldown
-        this.moveCooldown = 16;      // Movement update interval
+        this.moveCooldown = 16;      // 降低移动更新间隔，使移动更流畅
         
         // Input smoothing
-        this.volumeHistory = new Array(3).fill(0);
+        this.volumeHistory = new Array(3).fill(0);  // 减少平滑窗口大小，使响应更快
         this.pitchHistory = new Array(3).fill(0);
         this.historyIndex = 0;
         
-        // Speed scaling
-        this.speedScale = 1.5;       // Speed scaling
-        this.minSpeedScale = 0.6;    // Minimum speed scale
+        // Speed scaling - 增加速度缩放
+        this.speedScale = 2.0;       // 提高速度缩放
+        this.minSpeedScale = 0.9;    // 提高最小速度缩放
     }
 
     update(volume, pitch) {
@@ -74,7 +74,7 @@ class MovementController {
                 volumeRatio = 1 + (smoothVolume - 0.3) * this.speedScale;
             }
             
-            volumeRatio = Math.min(volumeRatio, 1.5); // Cap at 150% speed
+            volumeRatio = Math.min(volumeRatio, 2.0); // 提高速度上限
             
             this.targetSpeed = this.baseSpeed + 
                              (this.maxSpeed - this.baseSpeed) * volumeRatio;
@@ -149,7 +149,7 @@ class MovementController {
 
     getSmoothValue(history) {
         const sorted = [...history].sort((a, b) => a - b);
-        const filtered = sorted.slice(1, -1);
+        const filtered = sorted.slice(1, -1);  // 移除最高和最低值
         return filtered.reduce((sum, val) => sum + val, 0) / filtered.length || 0;
     }
 

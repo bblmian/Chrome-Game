@@ -1,7 +1,8 @@
 class Chicken extends Sprite {
     constructor(x, y) {
-        // Initialize with correct dimensions for the sprite
-        super(x, y, 48, 48);  // Slightly larger size for better visibility
+        // 创建一个固定大小的正方形容器 (48x48)
+        const containerSize = 48;
+        super(x, y, containerSize, containerSize);
         
         // Movement properties
         this.jumpForce = -500;
@@ -20,51 +21,36 @@ class Chicken extends Sprite {
         
         // Sprite properties
         this.facingRight = true;
-        this.spriteLoaded = false;
-        this.sprite = null;
-        this.spriteWidth = 48;   // Original sprite dimensions
-        this.spriteHeight = 48;
+        this.spriteLoaded = true; // 始终为true，因为我们直接绘制
         
         // Visual effects
-        this.shadowOpacity = 0.3;
         this.glowAmount = 0;
         this.glowDirection = 1;
         this.glowSpeed = 0.05;
         
+        // Colors
+        this.bodyColor = '#FFE135';     // 鸡身体黄色
+        this.beakColor = '#FF7F00';     // 鸡嘴橙色
+        this.eyeColor = '#000000';      // 眼睛黑色
+        this.legColor = '#FF4500';      // 腿部橙红色
+        
         // Debug logging
         this.debug = document.getElementById('debug');
-        
-        // Load sprite
-        this.loadSprite();
     }
 
-    log(message) {
-        console.log(message);
-        if (this.debug) {
-            const time = new Date().toLocaleTimeString();
-            this.debug.innerHTML = `${time} - ${message}\n` + this.debug.innerHTML;
-        }
+    // 添加移动方法
+    move(speed) {
+        this.velocityX = speed;
+        this.facingRight = speed > 0;
     }
 
-    loadSprite() {
-        if (this.sprite) {
-            this.sprite.onload = null;
-            this.sprite.onerror = null;
+    // 添加跳跃方法
+    jump(force) {
+        if (!this.isJumping) {
+            this.velocityY = force;
+            this.isJumping = true;
+            this.isOnGround = false;
         }
-
-        this.sprite = new Image();
-        this.sprite.onload = () => {
-            this.log('小鸡精灵图加载成功');
-            this.spriteLoaded = true;
-            // Update sprite dimensions based on loaded image
-            this.spriteWidth = this.sprite.width / 2;  // Two frames in sprite sheet
-            this.spriteHeight = this.sprite.height;
-        };
-        this.sprite.onerror = (error) => {
-            this.log('小鸡精灵图加载失败，使用备用图形');
-            this.spriteLoaded = false;
-        };
-        this.sprite.src = 'assets/chicken_2.png';
     }
 
     update(deltaTime) {
@@ -91,7 +77,7 @@ class Chicken extends Sprite {
 
         // Update jump squish animation
         if (this.isJumping) {
-            this.jumpSquish = this.velocityY < 0 ? 0.8 : 1.2;
+            this.jumpSquish = this.velocityY < 0 ? 0.9 : 1.1;
         } else {
             this.jumpSquish = 1.0;
         }
@@ -107,101 +93,87 @@ class Chicken extends Sprite {
         }
     }
 
-    jump(jumpForce) {
-        if (this.isOnGround && !this.isJumping) {
-            // Initial jump
-            this.velocityY = jumpForce;
-            this.isJumping = true;
-            this.isOnGround = false;
-            this.sustainedJumpTime = 0;
-            this.state = 'jumping';
-            this.log(`跳跃 - 力度: ${jumpForce}`);
-        } else if (this.isJumping && this.sustainedJumpTime < this.maxSustainedJumpTime) {
-            // Sustained jump
-            this.velocityY += jumpForce * this.sustainedJumpMultiplier * 0.016;  // Assuming 60fps
-            this.sustainedJumpTime += 0.016;
-            this.log(`持续跳跃 - 力度: ${jumpForce}, 时间: ${this.sustainedJumpTime.toFixed(2)}`);
-        }
-    }
-
-    move(speed) {
-        // Always move right with given speed
-        this.velocityX = speed;
-    }
-
     draw(ctx) {
         ctx.save();
         
-        // Draw shadow
-        ctx.fillStyle = `rgba(0, 0, 0, ${this.shadowOpacity})`;
-        ctx.beginPath();
-        ctx.ellipse(
-            this.x + this.width/2,
-            this.y + this.height,
-            this.width/3,
-            this.height/6,
-            0, 0, Math.PI * 2
-        );
-        ctx.fill();
-        
-        // Apply translation and squish for jump animation
+        // 移动到容器中心
         ctx.translate(this.x + this.width/2, this.y + this.height/2);
-        ctx.scale(1/this.jumpSquish, this.jumpSquish);
         
-        if (this.spriteLoaded && this.sprite.complete) {
-            try {
-                // Add glow effect when jumping
-                if (this.isJumping) {
-                    ctx.shadowColor = 'rgba(255, 255, 0, 0.5)';
-                    ctx.shadowBlur = 10 + this.glowAmount * 5;
-                }
-
-                // Draw sprite frame
-                ctx.drawImage(
-                    this.sprite,
-                    this.animationFrame * this.spriteWidth, 0,  // Source position
-                    this.spriteWidth, this.spriteHeight,        // Source size
-                    -this.width/2, -this.height/2,              // Destination position
-                    this.width, this.height                     // Destination size
-                );
-            } catch (error) {
-                this.log(`绘制精灵图错误: ${error.message}`);
-                this.drawFallback(ctx);
-            }
-        } else {
-            this.drawFallback(ctx);
+        // 应用跳跃挤压效果
+        ctx.scale(this.jumpSquish, 1/this.jumpSquish);
+        
+        // 根据运动方向翻转
+        if (!this.facingRight) {
+            ctx.scale(-1, 1);
+        }
+        
+        const size = Math.min(this.width, this.height);
+        const halfSize = size / 2;
+        
+        try {
+            // 绘制像素风格的小鸡
+            ctx.translate(-halfSize, -halfSize);
+            
+            // 身体（圆形）
+            ctx.fillStyle = this.bodyColor;
+            ctx.beginPath();
+            ctx.arc(halfSize, halfSize, size * 0.35, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 头部（圆形）
+            ctx.beginPath();
+            ctx.arc(halfSize + size * 0.15, halfSize - size * 0.15, size * 0.25, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 眼睛
+            ctx.fillStyle = this.eyeColor;
+            ctx.beginPath();
+            ctx.arc(halfSize + size * 0.25, halfSize - size * 0.2, size * 0.05, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 鸡冠（三角形）
+            ctx.fillStyle = this.legColor;
+            ctx.beginPath();
+            ctx.moveTo(halfSize + size * 0.1, halfSize - size * 0.4);
+            ctx.lineTo(halfSize + size * 0.3, halfSize - size * 0.45);
+            ctx.lineTo(halfSize + size * 0.2, halfSize - size * 0.25);
+            ctx.closePath();
+            ctx.fill();
+            
+            // 鸡嘴
+            ctx.fillStyle = this.beakColor;
+            ctx.beginPath();
+            ctx.moveTo(halfSize + size * 0.4, halfSize - size * 0.15);
+            ctx.lineTo(halfSize + size * 0.5, halfSize - size * 0.1);
+            ctx.lineTo(halfSize + size * 0.4, halfSize - size * 0.05);
+            ctx.closePath();
+            ctx.fill();
+            
+            // 腿（根据动画帧改变位置）
+            ctx.fillStyle = this.legColor;
+            const legOffset = this.animationFrame * size * 0.1;
+            
+            // 左腿
+            ctx.fillRect(
+                halfSize - size * 0.2 - legOffset,
+                halfSize + size * 0.3,
+                size * 0.1,
+                size * 0.2
+            );
+            
+            // 右腿
+            ctx.fillRect(
+                halfSize + size * 0.1 + legOffset,
+                halfSize + size * 0.3,
+                size * 0.1,
+                size * 0.2
+            );
+            
+        } catch (error) {
+            this.log(`绘制小鸡错误: ${error.message}`);
         }
         
         ctx.restore();
-    }
-
-    drawFallback(ctx) {
-        // Simple colored shape as fallback
-        ctx.fillStyle = '#FF5722';  // Orange-red
-        ctx.strokeStyle = '#FFA000'; // Gold
-        ctx.lineWidth = 2;
-        
-        // Body
-        ctx.beginPath();
-        ctx.ellipse(0, 0, this.width/2, this.height/2, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-        
-        // Eyes
-        ctx.fillStyle = '#000000';
-        ctx.beginPath();
-        ctx.ellipse(this.width/4, -this.height/6, 3, 3, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Beak
-        ctx.fillStyle = '#FFA000';
-        ctx.beginPath();
-        ctx.moveTo(this.width/3, 0);
-        ctx.lineTo(this.width/2, -this.height/8);
-        ctx.lineTo(this.width/2, this.height/8);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
     }
 
     reset() {
@@ -218,6 +190,14 @@ class Chicken extends Sprite {
 
     stopSustainedJump() {
         this.sustainedJumpTime = this.maxSustainedJumpTime;
+    }
+
+    log(message) {
+        console.log(message);
+        if (this.debug) {
+            const time = new Date().toLocaleTimeString();
+            this.debug.innerHTML = `${time} - ${message}\n` + this.debug.innerHTML;
+        }
     }
 }
 

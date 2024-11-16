@@ -10,6 +10,7 @@ class PhysicsEngine {
         this.collisionPadding = 2;    // Small padding to prevent getting stuck
         this.platformBuffer = 5;      // Buffer zone for platform edges
         this.groundBuffer = 1;        // Buffer for ground detection
+        this.fallThreshold = 500;     // 增加掉落检测阈值到500像素
         
         // Game objects
         this.player = null;
@@ -135,8 +136,8 @@ class PhysicsEngine {
                 this.log(`地面状态改变: ${wasOnGround} -> ${this.player.isOnGround}`);
             }
 
-            // Check if player fell off
-            if (this.player.y > this.platforms[0].y + 200) {
+            // Check if player fell off (使用更大的阈值)
+            if (this.player.y > this.platforms[0].y + this.fallThreshold) {
                 return 'lose';
             }
 
