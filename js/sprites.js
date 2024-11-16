@@ -1,67 +1,50 @@
-class Sprite {
-    constructor(x, y, width, height) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.velocityX = 0;
-        this.velocityY = 0;
-        this.isJumping = false;
-        this.isOnGround = false;
-    }
-
-    update(deltaTime) {
-        this.x += this.velocityX * deltaTime;
-        this.y += this.velocityY * deltaTime;
-    }
-
-    reset() {
-        this.velocityX = 0;
-        this.velocityY = 0;
-        this.isJumping = false;
-        this.isOnGround = false;
-    }
-
-    getPosition() {
-        return {
-            x: this.x,
-            y: this.y
-        };
-    }
-
-    setPosition(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    getVelocity() {
-        return {
-            x: this.velocityX,
-            y: this.velocityY
-        };
-    }
-
-    setVelocity(vx, vy) {
-        this.velocityX = vx;
-        this.velocityY = vy;
-    }
-
-    getBounds() {
-        return {
-            x: this.x,
-            y: this.y,
-            width: this.width,
-            height: this.height
-        };
-    }
-
-    intersects(other) {
-        return !(this.x + this.width < other.x ||
-                this.x > other.x + other.width ||
-                this.y + this.height < other.y ||
-                this.y > other.y + other.height);
+// 精灵工厂类
+class SpriteFactory {
+    static createSprite(type, x, y, width, height) {
+        switch (type.toLowerCase()) {
+            case 'platform':
+                return new Platform(x, y, width, height);
+            case 'chicken':
+                return new Chicken(x, y);
+            case 'flag':
+                return new Flag(x, y);
+            default:
+                throw new Error(`未知的精灵类型: ${type}`);
+        }
     }
 }
 
-// Make Sprite class available globally
-window.Sprite = Sprite;
+// 导出精灵工厂
+window.SpriteFactory = SpriteFactory;
+
+// 精灵状态枚举
+const SpriteState = {
+    IDLE: 'idle',
+    MOVING: 'moving',
+    JUMPING: 'jumping',
+    FALLING: 'falling'
+};
+
+// 导出精灵状态
+window.SpriteState = SpriteState;
+
+// 精灵类型枚举
+const SpriteType = {
+    PLATFORM: 'platform',
+    CHICKEN: 'chicken',
+    FLAG: 'flag'
+};
+
+// 导出精灵类型
+window.SpriteType = SpriteType;
+
+// 精灵碰撞类型枚举
+const CollisionType = {
+    NONE: 'none',
+    SOLID: 'solid',
+    TRIGGER: 'trigger',
+    HAZARD: 'hazard'
+};
+
+// 导出碰撞类型
+window.CollisionType = CollisionType;

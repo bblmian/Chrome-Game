@@ -10,7 +10,11 @@ class PhysicsEngine {
         this.collisionPadding = 2;    // Small padding to prevent getting stuck
         this.platformBuffer = 5;      // Buffer zone for platform edges
         this.groundBuffer = 1;        // Buffer for ground detection
-        this.fallThreshold = 500;     // 增加掉落检测阈值到500像素
+        this.fallThreshold = 500;     // 掉落检测阈值
+        
+        // Hazard platform settings
+        this.hazardWarningTime = 2000;  // 危险平台警告时间（2秒）
+        this.hazardPlatforms = new Map(); // 存储危险平台的状态
         
         // Game objects
         this.player = null;
@@ -82,8 +86,19 @@ class PhysicsEngine {
                     
                     // Handle hazard platform
                     if (platform.type === 'hazard') {
-                        platform.startFalling();
-                        return 'lose';
+                        const now = Date.now();
+                        if (!this.hazardPlatforms.has(platform)) {
+                            // 第一次碰到危险平台，开始计时
+                            this.hazardPlatforms.set(platform, now);
+                            this.log(`危险平台警告开始: ${platform.x}, ${platform.y}`);
+                        } else {
+                            // 检查是否超过警告时间
+                            const startTime = this.hazardPlatforms.get(platform);
+                            if (now - startTime >= this.hazardWarningTime) {
+                                platform.startFalling();
+                                return 'lose';
+                            }
+                        }
                     }
 
                     // Resolve collision
@@ -117,6 +132,9 @@ class PhysicsEngine {
                         this.log(`碰撞检测 - 平台类型:${platform.type}, ` +
                                 `方向:${JSON.stringify(collision)}`);
                     }
+                } else {
+                    // 如果不再碰撞，移除平台的警告状态
+                    this.hazardPlatforms.delete(platform);
                 }
             }
 
@@ -136,7 +154,7 @@ class PhysicsEngine {
                 this.log(`地面状态改变: ${wasOnGround} -> ${this.player.isOnGround}`);
             }
 
-            // Check if player fell off (使用更大的阈值)
+            // Check if player fell off
             if (this.player.y > this.platforms[0].y + this.fallThreshold) {
                 return 'lose';
             }
