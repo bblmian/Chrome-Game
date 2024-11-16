@@ -46,6 +46,21 @@ body {
 
 canvas {
     display: block;
+    position: relative;
+    z-index: 2;  /* 提高画布层级，确保在海浪之上 */
+}
+
+/* 海浪层样式 */
+.wave-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 20%;  /* 舞台高度的五分之一 */
+    background-color: #ADD8E6;  /* 浅蓝色海浪 */
+    opacity: 0.6;  /* 半透明效果 */
+    z-index: 1;  /* 确保在视频水印层之下 */
+    pointer-events: none;  /* 不影响交互 */
 }
 
 .button-container {

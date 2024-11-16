@@ -88,17 +88,26 @@ class PhysicsEngine {
                     if (platform.type === 'hazard') {
                         const now = Date.now();
                         if (!this.hazardPlatforms.has(platform)) {
-                            // 第一次碰到危险平台，开始计时
+                            // 第一次碰到危险平台，开始计时和警告
                             this.hazardPlatforms.set(platform, now);
+                            platform.setWarning();
                             this.log(`危险平台警告开始: ${platform.x}, ${platform.y}`);
                         } else {
                             // 检查是否超过警告时间
                             const startTime = this.hazardPlatforms.get(platform);
                             if (now - startTime >= this.hazardWarningTime) {
                                 platform.startFalling();
-                                return 'lose';
+                                // 如果玩家在坠落的平台上，游戏结束
+                                if (this.player.isOnGround) {
+                                    return 'lose';
+                                }
                             }
                         }
+                    }
+
+                    // 如果平台正在坠落且玩家在上面，游戏结束
+                    if (platform.isFalling && this.player.isOnGround) {
+                        return 'lose';
                     }
 
                     // Resolve collision
@@ -147,6 +156,11 @@ class PhysicsEngine {
             } else {
                 // Apply air resistance
                 this.player.velocityX *= this.airResistance;
+            }
+
+            // Update platforms
+            for (const platform of this.platforms) {
+                platform.update(deltaTime);
             }
 
             // Log state changes for debugging
