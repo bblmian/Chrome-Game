@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小鸡闯关</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="game-content">
+        <div class="banner">
+            <img src="assets/banner.png" alt="小鸡闯关">
+        </div>
+
+        <div class="game-wrapper">
+            <div class="game-border"></div>
+            <div class="game-container">
+                <canvas id="gameCanvas" width="800" height="400"></canvas>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button id="startButton">开始游戏</button>
+            <button id="downloadButton" disabled>下载录像</button>
+        </div>
+
+        <div class="instructions">
+            <h2>游戏说明</h2>
+            <p>发出声音向前移动 - 声音越大移动越快</p>
+            <p>发出高音跳跃 - 音调越高跳得越高</p>
+            <p>持续发声可以延长跳跃时间</p>
+        </div>
+    </div>
+
+    <div id="debug"></div>
+
+    <!-- Debug utilities -->
+    <script src="js/debug-utils.js"></script>
+
+    <!-- Base classes -->
+    <script src="js/base-sprite.js"></script>
+    <script src="js/sprites.js"></script>
+    <script src="js/platform-sprite.js"></script>
+    <script src="js/chicken-sprite.js"></script>
+
+    <!-- Audio system -->
+    <script src="js/audio-processor.js"></script>
+    <script src="js/audio-controller.js"></script>
+    <script src="js/audio.js"></script>
+
+    <!-- Game components -->
+    <script src="js/background.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/recorder.js"></script>
+    <script src="js/level.js"></script>
+    <script src="js/physics.js"></script>
+    <script src="js/movement-controller.js"></script>
+    <script src="js/game-input.js"></script>
+    <script src="js/game-state.js"></script>
+    <script src="js/game-renderer.js"></script>
+    
+    <!-- Game core -->
+    <script src="js/game-manager-base.js"></script>
+    <script src="js/game-manager.js"></script>
+    <script src="js/game-core.js"></script>
+    <script src="js/game-loop.js"></script>
+    <script src="js/game.js"></script>
+
+    <!-- Game initialization -->
+    <script src="js/game-init.js"></script>
+</body>
+</html>

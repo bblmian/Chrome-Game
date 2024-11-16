@@ -1,0 +1,53 @@
+# 在GitHub上创建新仓库后，按顺序执行以下命令：
+
+# 1. 初始化本地Git仓库
+git init
+
+# 2. 添加所有文件到暂存区
+git add .
+
+# 3. 创建初始提交
+git commit -m "Initial commit: Voice controlled game implementation"
+
+# 4. 添加GitHub远程仓库（将URL替换为你的GitHub仓库地址）
+git remote add origin https://github.com/yourusername/voice-controlled-game.git
+
+# 5. 推送代码到GitHub
+git push -u origin main
+
+# 注意：如果你的默认分支是master而不是main，使用：
+# git push -u origin master
+
+# 其他常用Git命令：
+
+# 检查仓库状态
+git status
+
+# 查看分支
+git branch
+
+# 创建并切换到新分支
+git checkout -b feature/new-feature
+
+# 合并分支
+git merge feature/new-feature
+
+# 拉取最新更新
+git pull origin main
+
+# 查看提交历史
+git log
+
+# 提交规范建议：
+# feat: 新功能
+# fix: 修复bug
+# docs: 文档更新
+# style: 代码格式修改
+# refactor: 代码重构
+# test: 测试用例修改
+# chore: 其他修改
+
+# 示例：
+# git commit -m "feat: Add voice control functionality"
+# git commit -m "fix: Fix jumping mechanism"
+# git commit -m "docs: Update README.md"
