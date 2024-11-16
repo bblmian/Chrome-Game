@@ -16,13 +16,18 @@ class Game {
                 'GameCore', 'GameManager', 'GameLoop', 'GameState',
                 'GameRenderer', 'GameBackground', 'GameUI',
                 'Sprite', 'Platform', 'Flag', 'Chicken',
-                'AudioController', 'AudioProcessor'
+                'AudioController', 'AudioProcessor', 'GameAudio'
             ];
             
             for (const className of requiredClasses) {
                 if (typeof window[className] === 'undefined') {
                     throw new Error(`Required class ${className} is not defined`);
                 }
+            }
+
+            // Verify audio system
+            if (!window.audioSystem) {
+                throw new Error('AudioSystem not found');
             }
             
             // Create game manager

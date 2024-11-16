@@ -1,11 +1,13 @@
 class GameInput {
-    constructor(audioController) {
-        if (!audioController) {
-            throw new Error('AudioController is required for GameInput');
+    constructor() {
+        // Use global audio system
+        if (!window.audioSystem) {
+            throw new Error('AudioSystem is required for GameInput');
         }
         
-        this.audioController = audioController;
-        this.movementController = new MovementController();
+        this.audioSystem = window.audioSystem;
+        this.audioController = this.audioSystem.controller;
+        this.movementController = this.audioController.movementController;
         this.debug = document.getElementById('debug');
         
         // Input smoothing
@@ -42,7 +44,7 @@ class GameInput {
 
     update() {
         try {
-            // Get raw input values
+            // Get raw input values from audio controller
             let rawVolume = this.audioController.getVolumeLevel();
             let rawPitch = this.audioController.getPitchLevel();
 
@@ -123,14 +125,16 @@ class GameInput {
         this.volumeHistory.fill(0);
         this.pitchHistory.fill(0);
         this.historyIndex = 0;
-        this.movementController.reset();
+        if (this.movementController) {
+            this.movementController.reset();
+        }
     }
 
     getState() {
         return {
             volume: this.lastVolume,
             pitch: this.lastPitch,
-            movement: this.movementController.getState()
+            movement: this.movementController ? this.movementController.getState() : null
         };
     }
 

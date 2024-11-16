@@ -9,6 +9,9 @@ class GameAudio {
         this.controller = null;
         this.isInitialized = false;
         this.processingInterval = null;
+        
+        // Debug mode
+        this.debugMode = false;
     }
 
     log(message) {
@@ -67,6 +70,13 @@ class GameAudio {
             this.startAudioProcessing();
             
             this.log('音频流设置成功');
+            
+            // 开启调试模式以便观察音频数据
+            if (this.debugMode) {
+                this.processor.toggleDebug();
+                this.controller.toggleDebug();
+            }
+            
             return true;
         } catch (error) {
             this.log(`音频流设置错误: ${error.message}`);
@@ -83,6 +93,10 @@ class GameAudio {
         // 设置新的处理间隔
         this.processingInterval = setInterval(() => {
             try {
+                if (!this.processor || !this.controller) {
+                    throw new Error('音频处理组件未初始化');
+                }
+
                 // 获取音频分析数据
                 const volume = this.processor.getVolumeLevel();
                 const pitch = this.processor.getPitchLevel();
@@ -91,8 +105,14 @@ class GameAudio {
                 this.controller.setVolumeLevel(volume);
                 this.controller.setPitchLevel(pitch);
 
+                // Debug output
+                if (this.debugMode && (volume > 0.1 || pitch > 0.1)) {
+                    this.log(`处理中 - 音量: ${volume.toFixed(3)}, 音高: ${pitch.toFixed(3)}`);
+                }
+
             } catch (error) {
                 this.log(`音频处理错误: ${error.message}`);
+                console.error('Audio processing error:', error);
             }
         }, 16); // 约60fps的更新率
     }
@@ -103,6 +123,12 @@ class GameAudio {
             if (this.processingInterval) {
                 clearInterval(this.processingInterval);
                 this.processingInterval = null;
+            }
+
+            // 停止音频流
+            if (this.mediaStreamSource && this.mediaStreamSource.mediaStream) {
+                const tracks = this.mediaStreamSource.mediaStream.getTracks();
+                tracks.forEach(track => track.stop());
             }
 
             // 清理音频上下文
@@ -122,7 +148,19 @@ class GameAudio {
             this.log('音频系统已清理');
         } catch (error) {
             this.log(`音频系统清理错误: ${error.message}`);
+            console.error('Audio cleanup error:', error);
         }
+    }
+
+    toggleDebug() {
+        this.debugMode = !this.debugMode;
+        if (this.processor) {
+            this.processor.toggleDebug();
+        }
+        if (this.controller) {
+            this.controller.toggleDebug();
+        }
+        this.log(`音频系统调试: ${this.debugMode ? '开启' : '关闭'}`);
     }
 }
 
