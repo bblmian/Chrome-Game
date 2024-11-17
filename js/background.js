@@ -76,22 +76,40 @@ class GameBackground {
         const videoRatio = this.videoWidth / this.videoHeight;
 
         let drawWidth, drawHeight, x, y;
+        let sourceX = 0, sourceY = 0, sourceWidth = this.videoWidth, sourceHeight = this.videoHeight;
 
         if (canvasRatio > videoRatio) {
-            // Canvas is wider than video
+            // Canvas is wider than video - match width and crop height
+            sourceHeight = this.videoWidth / canvasRatio;
+            sourceY = (this.videoHeight - sourceHeight) / 2;
             drawWidth = this.canvas.width;
-            drawHeight = this.canvas.width / videoRatio;
-            x = 0;
-            y = (this.canvas.height - drawHeight) / 2;
-        } else {
-            // Canvas is taller than video
             drawHeight = this.canvas.height;
-            drawWidth = this.canvas.height * videoRatio;
-            x = (this.canvas.width - drawWidth) / 2;
+            x = 0;
+            y = 0;
+        } else {
+            // Canvas is taller than video - match height and crop width
+            sourceWidth = this.videoHeight * canvasRatio;
+            sourceX = (this.videoWidth - sourceWidth) / 2;
+            drawWidth = this.canvas.width;
+            drawHeight = this.canvas.height;
+            x = 0;
             y = 0;
         }
 
-        return { x, y, width: drawWidth, height: drawHeight };
+        return {
+            source: {
+                x: sourceX,
+                y: sourceY,
+                width: sourceWidth,
+                height: sourceHeight
+            },
+            dest: {
+                x: x,
+                y: y,
+                width: drawWidth,
+                height: drawHeight
+            }
+        };
     }
 
     draw(ctx) {
@@ -101,10 +119,6 @@ class GameBackground {
             // Save context state
             ctx.save();
             
-            // Clear the canvas
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
             // Calculate video dimensions
             const dimensions = this.calculateVideoDimensions();
             if (!dimensions) return;
@@ -116,10 +130,14 @@ class GameBackground {
             // Draw video frame with calculated dimensions
             ctx.drawImage(
                 this.video,
-                dimensions.x,
-                dimensions.y,
-                dimensions.width,
-                dimensions.height
+                dimensions.source.x,
+                dimensions.source.y,
+                dimensions.source.width,
+                dimensions.source.height,
+                dimensions.dest.x,
+                dimensions.dest.y,
+                dimensions.dest.width,
+                dimensions.dest.height
             );
             
             // Restore context for normal drawing
