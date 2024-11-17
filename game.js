@@ -1,6 +1,6 @@
-// 首先导入适配器
-import { canvas, document } from './js/libs/weapp-adapter'
-import './js/libs/symbol'
+// 导入适配器
+const { canvas, document } = require('./js/libs/weapp-adapter')
+require('./js/libs/symbol')
 
 const ctx = canvas.getContext('2d')
 const gameWidth = canvas.width

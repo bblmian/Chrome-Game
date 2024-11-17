@@ -14,9 +14,11 @@ const document = {
     }
 }
 
+const canvas = wx.createCanvas()
+
 const window = {
     document,
-    canvas: wx.createCanvas(),
+    canvas,
     setTimeout,
     setInterval,
     clearTimeout,
@@ -72,9 +74,9 @@ Object.keys(window).forEach(key => {
 // 设置全局window
 global.window = window
 
-export default window
-export {
-    canvas,
+module.exports = {
+    window,
     document,
-    TouchEvent
+    canvas,
+    TouchEvent: window.TouchEvent
 }

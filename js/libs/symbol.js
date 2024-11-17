@@ -36,4 +36,4 @@ Symbol.keyFor = Symbol.keyFor || function(sym) {
 
 Symbol.registry = {}
 
-export default Symbol
+module.exports = Symbol
