@@ -1,15 +1,12 @@
 class GameBackground {
     constructor(canvas) {
         this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
         this.video = null;
         this.debug = document.getElementById('debug');
         this.isInitialized = false;
         
         // Background settings
         this.overlayColor = 'rgba(255, 255, 255, 0.3)';  // Lighter overlay
-        this.overlayGradient = null;
-        this.createGradient();
     }
 
     log(message) {
@@ -20,12 +17,13 @@ class GameBackground {
         }
     }
 
-    createGradient() {
+    createGradient(ctx) {
         // Create a gradient for better visibility of game objects
-        this.overlayGradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        this.overlayGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');    // Lighter at top
-        this.overlayGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.2)');  // More transparent in middle
-        this.overlayGradient.addColorStop(1, 'rgba(255, 255, 255, 0.4)');    // Lighter at bottom
+        const gradient = ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');    // Lighter at top
+        gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.2)');  // More transparent in middle
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0.4)');    // Lighter at bottom
+        return gradient;
     }
 
     async initialize() {
@@ -65,36 +63,33 @@ class GameBackground {
         }
     }
 
-    draw() {
+    draw(ctx) {
         if (!this.isInitialized || !this.video) return;
 
         try {
-            // Clear canvas
-            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            
             // Save context state
-            this.ctx.save();
+            ctx.save();
             
             // Mirror the video horizontally for more intuitive interaction
-            this.ctx.scale(-1, 1);
-            this.ctx.translate(-this.canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.translate(-this.canvas.width, 0);
             
             // Draw video frame
-            this.ctx.drawImage(
+            ctx.drawImage(
                 this.video,
                 0, 0,
                 this.canvas.width, this.canvas.height
             );
             
             // Restore context for normal drawing
-            this.ctx.restore();
+            ctx.restore();
             
             // Add gradient overlay for better visibility
-            this.ctx.fillStyle = this.overlayGradient;
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            ctx.fillStyle = this.createGradient(ctx);
+            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
             
             // Add vignette effect for better focus
-            this.drawVignette();
+            this.drawVignette(ctx);
             
         } catch (error) {
             this.log(`视频背景绘制错误: ${error.message}`);
@@ -102,8 +97,8 @@ class GameBackground {
         }
     }
 
-    drawVignette() {
-        const gradient = this.ctx.createRadialGradient(
+    drawVignette(ctx) {
+        const gradient = ctx.createRadialGradient(
             this.canvas.width/2, this.canvas.height/2, 0,
             this.canvas.width/2, this.canvas.height/2, this.canvas.width/1.5
         );
@@ -111,8 +106,8 @@ class GameBackground {
         gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
         
-        this.ctx.fillStyle = gradient;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     cleanup() {
@@ -133,7 +128,6 @@ class GameBackground {
     resize(width, height) {
         this.canvas.width = width;
         this.canvas.height = height;
-        this.createGradient();  // Recreate gradient for new dimensions
     }
 }
 

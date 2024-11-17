@@ -16,13 +16,18 @@ class Game {
                 'GameCore', 'GameManager', 'GameLoop', 'GameState',
                 'GameRenderer', 'GameBackground', 'GameUI',
                 'Sprite', 'Platform', 'Flag', 'Chicken',
-                'AudioController', 'AudioProcessor'
+                'AudioController', 'AudioProcessor', 'GameAudio'
             ];
             
             for (const className of requiredClasses) {
                 if (typeof window[className] === 'undefined') {
                     throw new Error(`Required class ${className} is not defined`);
                 }
+            }
+
+            // Verify audio system
+            if (!window.audioSystem) {
+                throw new Error('AudioSystem not found');
             }
             
             // Create game manager
@@ -75,12 +80,23 @@ class Game {
                 }
             }
 
-            // Initialize audio controller
-            this.log('初始化音频...');
-            if (!window.audioController) {
-                throw new Error('音频控制器未找到');
+            // Initialize audio system
+            this.log('初始化音频系统...');
+            if (!window.audioSystem) {
+                throw new Error('音频系统未找到');
             }
-            await window.audioController.initialize(stream);
+
+            // Initialize audio system
+            const audioInitialized = await window.audioSystem.initialize();
+            if (!audioInitialized) {
+                throw new Error('音频系统初始化失败');
+            }
+
+            // Setup audio stream
+            const streamSetup = await window.audioSystem.setupStream(stream);
+            if (!streamSetup) {
+                throw new Error('音频流设置失败');
+            }
 
             // Initialize game components
             this.log('初始化游戏组件...');
@@ -148,9 +164,9 @@ class Game {
 
     cleanup() {
         try {
-            // Cleanup audio
-            if (window.audioController) {
-                window.audioController.cleanup();
+            // Cleanup audio system
+            if (window.audioSystem) {
+                window.audioSystem.cleanup();
             }
 
             // Cleanup game manager

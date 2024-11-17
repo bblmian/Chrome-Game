@@ -2,11 +2,6 @@ class GameManager extends GameManagerBase {
     constructor(canvas) {
         super(canvas);
         
-        // Initialize audio controller if not already initialized
-        if (!window.audioController) {
-            window.audioController = new AudioController();
-        }
-
         // Debug logging
         this.debug = document.getElementById('debug');
         
@@ -44,6 +39,11 @@ class GameManager extends GameManagerBase {
                 if (typeof window[className] === 'undefined') {
                     throw new Error(`Required class ${className} is not defined`);
                 }
+            }
+
+            // Verify audio system is initialized
+            if (!window.audioSystem) {
+                throw new Error('AudioSystem is not initialized');
             }
 
             // Cleanup previous instances

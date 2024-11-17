@@ -1,42 +1,34 @@
 class Level {
     constructor(width, height) {
-        // Verify required classes
-        if (typeof Platform === 'undefined') {
-            throw new Error('Platform class must be loaded before Level');
-        }
-        if (typeof Flag === 'undefined') {
-            throw new Error('Flag class must be loaded before Level');
-        }
-
         this.width = width;
         this.height = height;
         
-        // Level boundaries
-        this.minY = height * 0.3;     // Platforms start at 30% from top
-        this.maxY = height * 0.7;     // Platforms end at 70% from top
-        this.groundY = height * 0.75;  // Ground level at 75% from top
+        // 平台配置
+        this.platformHeight = 20;
+        this.minPlatformWidth = 80;   // 减小最小平台宽度
+        this.maxPlatformWidth = 160;  // 减小最大平台宽度
+        this.minGapWidth = 60;        // 保持最小间隔
+        this.maxGapWidth = 120;       // 保持最大间隔
+        this.hazardProbability = 0.35; // 保持危险平台概率
         
-        // Platform settings
-        this.minPlatformWidth = 100;
-        this.maxPlatformWidth = 200;
-        this.minGap = 120;            // Minimum gap between platforms
-        this.maxGap = 200;            // Maximum gap between platforms
-        this.platformHeight = 30;      // Platform height
-        
-        // Level data
-        this.playerStart = { x: 50, y: this.groundY - 50 };  // Start position above ground
+        // 初始化关卡元素
         this.platforms = [];
         this.flag = null;
+        
+        // 设置玩家起始位置
+        this.playerStart = {
+            x: 100,
+            y: height - 150  // 提高起始位置
+        };
         
         // Debug logging
         this.debug = document.getElementById('debug');
         
-        try {
-            this.generate();
-        } catch (error) {
-            this.log(`关卡生成错误: ${error.message}`);
-            throw error;
-        }
+        // 生成平台
+        this.generatePlatforms();
+        
+        // 创建终点旗帜
+        this.createFlag();
     }
 
     log(message) {
@@ -47,186 +39,161 @@ class Level {
         }
     }
 
-    generate() {
-        this.platforms = [];
-        
+    generatePlatforms() {
         try {
-            // Generate starting ground platform (wider and taller)
-            const groundPlatform = new Platform(
-                0,                  // x
-                this.groundY,       // y
-                400,               // Wider starting platform
-                50,                // Taller ground platform
-                'normal'           // type
-            );
-            this.platforms.push(groundPlatform);
-            this.log('生成起始平台');
-
-            // Generate level platforms
-            let lastX = 350;  // Start after ground platform
-            let lastY = this.groundY - 50;  // Start slightly above ground
-            let platformCount = 0;
+            // 清空现有平台
+            this.platforms = [];
             
-            while (lastX < this.width - 400) {  // Leave space for flag
-                // Generate platform gap
-                const gap = Math.random() * (this.maxGap - this.minGap) + this.minGap;
-                lastX += gap;
-
-                // Generate platform width
-                const width = Math.random() * (this.maxPlatformWidth - this.minPlatformWidth) + 
-                            this.minPlatformWidth;
-
-                // Calculate platform height with smoother transitions
-                const maxYChange = 60;  // Reduced for smoother level
-                let y = lastY + (Math.random() * maxYChange * 2 - maxYChange);
-                y = Math.max(this.minY, Math.min(this.maxY, y));
-
-                // Add normal platform
+            // 添加起始平台（玩家起始位置下方的安全平台）
+            const startPlatform = new Platform(
+                50,  // 稍微向左偏移
+                this.playerStart.y + 30,  // 在玩家起始位置下方
+                200, // 较宽的起始平台
+                this.platformHeight,
+                'normal'
+            );
+            this.platforms.push(startPlatform);
+            
+            // 生成其他平台
+            let currentX = 300;  // 从玩家起始位置右侧开始
+            let currentY = this.playerStart.y;  // 从玩家高度开始
+            let lastPlatformType = 'normal';
+            
+            while (currentX < this.width - 200) {  // 留出终点旗帜的空间
+                // 随机调整高度（上下波动）
+                const heightVariation = Math.random() * 100 - 50;  // -50到50的变化
+                currentY = Math.min(Math.max(
+                    currentY + heightVariation,
+                    this.height * 0.3  // 最高点
+                ), this.height * 0.7);  // 最低点
+                
+                // 生成平台
+                const platformWidth = Math.random() * 
+                                    (this.maxPlatformWidth - this.minPlatformWidth) + 
+                                    this.minPlatformWidth;
+                
+                // 确定平台类型（避免连续的危险平台）
+                let platformType;
+                if (lastPlatformType === 'hazard') {
+                    platformType = 'normal';
+                } else {
+                    platformType = Math.random() < this.hazardProbability ? 'hazard' : 'normal';
+                }
+                
                 const platform = new Platform(
-                    lastX,
-                    y,
-                    width,
+                    currentX,
+                    currentY,
+                    platformWidth,
                     this.platformHeight,
-                    'normal'
+                    platformType
                 );
+                
                 this.platforms.push(platform);
-                platformCount++;
-
-                // 20% chance to add hazard platform if not too early in level
-                if (platformCount > 3 && Math.random() < 0.2) {
-                    const hazardPlatform = new Platform(
-                        lastX + width + 40,
-                        y,
-                        40,
-                        this.platformHeight,
-                        'hazard'
-                    );
-                    this.platforms.push(hazardPlatform);
-                }
-
-                // 10% chance to add long jump distance if not too early
-                if (platformCount > 2 && Math.random() < 0.1) {
-                    lastX += 150;  // Add extra gap for challenge
-                }
-
-                lastX += width;
-                lastY = y;
+                lastPlatformType = platformType;
+                
+                // 添加间隔（根据高度差调整）
+                const heightDiff = Math.abs(heightVariation);
+                const gapWidth = Math.random() * 
+                               (this.maxGapWidth - this.minGapWidth) + 
+                               this.minGapWidth;
+                               
+                // 如果高度差大，增加间隔
+                const gapMultiplier = heightDiff > 30 ? 1.2 : 1;
+                
+                currentX += platformWidth + gapWidth * gapMultiplier;
             }
-
-            // Add final platform for flag
+            
+            // 添加终点平台（稍高一些，增加挑战性）
             const finalPlatform = new Platform(
-                this.width - 200,
-                lastY,
+                this.width - 150,
+                this.height * 0.4,  // 在较高的位置
                 150,
                 this.platformHeight,
                 'normal'
             );
-            this.platforms.push(finalPlatform);
-
-            // Add finish flag
-            this.flag = new Flag(
-                this.width - 100,
-                lastY - 64  // Flag height
-            );
-
-            this.log(`关卡生成完成 - 平台数量: ${this.platforms.length}`);
             
-            // Log level details
-            this.platforms.forEach((platform, index) => {
-                if (Math.random() < 0.1) {  // Log only some platforms to avoid spam
-                    this.log(`平台 ${index}: 位置(${Math.round(platform.x)}, ${Math.round(platform.y)}), ` +
-                            `尺寸(${platform.width}, ${platform.height}), 类型:${platform.type}`);
-                }
-            });
+            this.platforms.push(finalPlatform);
+            
+            this.log('平台生成成功');
         } catch (error) {
-            this.log(`关卡生成错误: ${error.message}`);
+            this.log(`平台生成错误: ${error.message}`);
             throw error;
         }
     }
 
-    getPlatformAt(x, y) {
-        return this.platforms.find(platform => {
-            return x >= platform.x && 
-                   x <= platform.x + platform.width &&
-                   y >= platform.y &&
-                   y <= platform.y + platform.height;
-        });
-    }
-
-    getPlatformsInArea(x, y, width, height) {
-        return this.platforms.filter(platform => {
-            return !(platform.x + platform.width < x ||
-                    platform.x > x + width ||
-                    platform.y + platform.height < y ||
-                    platform.y > y + height);
-        });
-    }
-
-    getNextPlatform(currentX) {
-        return this.platforms.find(platform => 
-            platform.x > currentX && platform.type === 'normal'
-        );
-    }
-
-    getNearestSafePlatform(x, y) {
-        let nearest = null;
-        let minDist = Infinity;
-        
-        for (const platform of this.platforms) {
-            if (platform.type === 'normal') {
-                const dx = platform.x + platform.width/2 - x;
-                const dy = platform.y - y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                
-                if (dist < minDist) {
-                    minDist = dist;
-                    nearest = platform;
-                }
+    createFlag() {
+        try {
+            // 在最后一个平台上方创建旗帜
+            const lastPlatform = this.platforms[this.platforms.length - 1];
+            if (!lastPlatform) {
+                throw new Error('没有找到最后的平台');
             }
+            
+            this.flag = new Flag(
+                lastPlatform.x + lastPlatform.width - 50,  // 距离平台右边缘50像素
+                lastPlatform.y - 50  // 在平台上方50像素
+            );
+            
+            this.log('旗帜创建成功');
+        } catch (error) {
+            this.log(`旗帜创建错误: ${error.message}`);
+            throw error;
         }
-        
-        return nearest;
-    }
-
-    isAtFlag(x, y) {
-        return this.flag && 
-               x >= this.flag.x && 
-               x <= this.flag.x + this.flag.width &&
-               y >= this.flag.y &&
-               y <= this.flag.y + this.flag.height;
     }
 
     update(deltaTime) {
-        // Update hazard platforms
-        for (const platform of this.platforms) {
-            if (platform.type === 'hazard' && platform.falling) {
+        try {
+            // 更新所有平台
+            for (const platform of this.platforms) {
                 platform.update(deltaTime);
             }
-        }
-
-        // Remove fallen platforms
-        this.platforms = this.platforms.filter(platform => 
-            platform.type !== 'hazard' || platform.y < this.height + 100
-        );
-
-        // Update flag animation
-        if (this.flag) {
-            this.flag.update(deltaTime);
+            
+            // 更新旗帜
+            if (this.flag) {
+                this.flag.update(deltaTime);
+            }
+        } catch (error) {
+            this.log(`关卡更新错误: ${error.message}`);
         }
     }
 
-    triggerPlatformFall(platform) {
-        if (platform && platform.type === 'hazard' && !platform.falling) {
-            return platform.startFalling();
+    draw(ctx, camera) {
+        try {
+            // 绘制所有平台
+            for (const platform of this.platforms) {
+                if (camera.isInView(platform.x, platform.y, platform.width, platform.height)) {
+                    platform.draw(ctx, camera);
+                }
+            }
+            
+            // 绘制旗帜
+            if (this.flag && camera.isInView(this.flag.x, this.flag.y, this.flag.width, this.flag.height)) {
+                this.flag.draw(ctx);
+            }
+        } catch (error) {
+            this.log(`关卡渲染错误: ${error.message}`);
         }
-        return false;
+    }
+
+    reset() {
+        try {
+            // 重新生成关卡
+            this.generatePlatforms();
+            this.createFlag();
+            this.log('关卡重置成功');
+        } catch (error) {
+            this.log(`关卡重置错误: ${error.message}`);
+        }
     }
 
     getState() {
         return {
-            playerStart: { ...this.playerStart },
-            platformCount: this.platforms.length,
-            flagPosition: this.flag ? { x: this.flag.x, y: this.flag.y } : null
+            platforms: this.platforms.map(p => p.getState()),
+            flag: this.flag ? {
+                x: this.flag.x,
+                y: this.flag.y
+            } : null,
+            playerStart: { ...this.playerStart }
         };
     }
 }

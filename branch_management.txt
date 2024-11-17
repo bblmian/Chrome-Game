@@ -1,0 +1,66 @@
+# 在VSCode中创建和管理新功能分支的方法：
+
+方法一：通过VSCode界面
+1. 点击VSCode左下角的分支名称（通常是"main"或"master"）
+2. 在弹出的命令面板中选择"Create new branch..."
+3. 输入新分支名称，建议使用描述性的名称，例如：
+   - feature/improve-jump-mechanics
+   - feature/add-sound-effects
+   - feature/optimize-performance
+4. 按Enter确认，VSCode会自动切换到新分支
+
+方法二：通过Source Control面板
+1. 点击左侧Source Control图标
+2. 点击面板顶部的当前分支名称
+3. 选择"Create new branch..."
+4. 输入分支名称并确认
+
+分支开发工作流：
+1. 创建新分支后，所有改动都会在新分支上进行
+2. 在Source Control面板中可以：
+   - 查看改动的文件
+   - 暂存更改（Stage Changes）
+   - 提交更改（Commit）
+   - 推送到远程（Push）
+
+合并分支：
+1. 完成功能开发后，切换回main分支：
+   - 点击左下角分支名称
+   - 选择"main"或"master"
+2. 选择"Merge branch..."
+3. 选择要合并的功能分支
+
+分支命名建议：
+- feature/* : 新功能
+- bugfix/* : 修复问题
+- refactor/* : 代码重构
+- docs/* : 文档更新
+
+例如：
+- feature/add-background-music
+- feature/improve-collision-detection
+- bugfix/fix-jump-delay
+- refactor/optimize-audio-processing
+
+最佳实践：
+1. 每个新功能创建独立分支
+2. 保持分支更改范围小且集中
+3. 经常提交代码，提交信息要清晰
+4. 定期将main分支的更新合并到功能分支
+5. 完成功能后及时合并回main分支
+
+在VSCode中查看分支：
+- 使用Source Control面板的分支菜单
+- 使用Git Graph扩展可视化分支历史
+- 通过状态栏查看当前分支状态
+
+分支管理快捷键：
+- Cmd+Shift+P (Mac) / Ctrl+Shift+P (Windows)
+  然后输入 "Git: Checkout to..."
+- 可以在键盘快捷键设置中自定义分支操作的快捷键
+
+注意事项：
+- 切换分支前确保当前更改已提交或暂存
+- 合并前先拉取最新的main分支更新
+- 解决合并冲突时仔细检查代码
+- 推送前确保本地测试通过

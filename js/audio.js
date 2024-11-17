@@ -1,26 +1,17 @@
-class AudioController {
+// 游戏音频系统类
+class GameAudio {
     constructor() {
-        console.log('AudioController initialized');
-        this.audioContext = null;
-        this.analyser = null;
-        this.mediaStreamSource = null;
-        this.volumeData = new Float32Array(2048);
-        this.pitchData = new Float32Array(2048);
         this.debug = document.getElementById('debug');
-        this.volumeSmoothing = 0.3;  // 降低平滑度以提高响应速度
-        this.pitchSmoothing = 0.3;   // 降低平滑度以提高响应速度
-        this.lastVolume = 0;
-        this.lastPitch = 0;
-        this.sustainedVolume = 0;     // 持续音量检测
+        this.audioContext = null;
+        this.mediaStreamSource = null;
+        this.analyser = null;
+        this.processor = null;
+        this.controller = null;
         this.isInitialized = false;
-
-        // Bind methods
-        this.initialize = this.initialize.bind(this);
-        this.getVolumeLevel = this.getVolumeLevel.bind(this);
-        this.getPitchLevel = this.getPitchLevel.bind(this);
-        this.getSustainedVolume = this.getSustainedVolume.bind(this);
-        this.cleanup = this.cleanup.bind(this);
-        this.log = this.log.bind(this);
+        this.processingInterval = null;
+        
+        // Debug mode
+        this.debugMode = false;
     }
 
     log(message) {
@@ -31,162 +22,153 @@ class AudioController {
         }
     }
 
-    async initialize(audioStream) {
+    async initialize() {
         try {
-            // 清理现有的音频上下文
-            await this.cleanup();
-
-            this.log('初始化音频控制器...');
-
-            // 创建新的音频上下文
+            // 创建音频上下文
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            await this.audioContext.resume();
-            this.log('音频上下文已创建');
             
-            // 创建分析器节点
-            this.analyser = this.audioContext.createAnalyser();
-            this.analyser.fftSize = 4096;  // 增加FFT大小以提高频率分辨率
-            this.analyser.smoothingTimeConstant = 0.1;  // 降低平滑时间以提高响应速度
-            this.log('分析器节点已创建');
+            // 创建音频处理器
+            this.processor = new AudioProcessor();
             
-            // 创建增益节点来提升信号
-            const gainNode = this.audioContext.createGain();
-            gainNode.gain.value = 2.0;  // 提升输入信号
+            // 创建音频控制器
+            this.controller = new AudioController();
             
-            // 创建媒体流源
-            this.mediaStreamSource = this.audioContext.createMediaStreamSource(audioStream);
-            this.log('媒体流源已创建');
-            
-            // 连接节点
-            this.mediaStreamSource.connect(gainNode);
-            gainNode.connect(this.analyser);
-            this.log('音频节点已连接');
-            
-            // 初始化数据数组
-            this.volumeData = new Float32Array(this.analyser.frequencyBinCount);
-            this.pitchData = new Float32Array(this.analyser.frequencyBinCount);
+            // 设置为全局可访问
+            window.audioController = this.controller;
             
             this.isInitialized = true;
-            this.log('音频控制器初始化完成');
+            this.log('音频系统初始化成功');
+            return true;
         } catch (error) {
-            this.log(`音频控制器初始化错误: ${error.message}`);
-            this.isInitialized = false;
-            throw error;
+            this.log(`音频系统初始化错误: ${error.message}`);
+            return false;
         }
     }
 
-    getVolumeLevel() {
-        if (!this.isInitialized || !this.analyser) return 0;
-
+    async setupStream(stream) {
         try {
-            this.analyser.getFloatFrequencyData(this.volumeData);
+            if (!this.isInitialized) {
+                throw new Error('音频系统未初始化');
+            }
+
+            // 创建媒体流源
+            this.mediaStreamSource = this.audioContext.createMediaStreamSource(stream);
             
-            // 计算人声范围的RMS音量
-            let sum = 0;
-            let count = 0;
-            
-            // 关注人声频率范围 (100Hz - 3000Hz)
-            const startBin = Math.floor(this.volumeData.length * 0.05);  // ~100Hz
-            const endBin = Math.floor(this.volumeData.length * 0.6);     // ~3000Hz
-            
-            for (let i = startBin; i < endBin; i++) {
-                // 将dB转换为线性刻度并应用频率权重
-                const amplitude = Math.pow(10, (this.volumeData[i] + 140) / 20);
-                const weight = this.getFrequencyWeight(i, startBin, endBin);
-                sum += amplitude * amplitude * weight;
-                count += weight;
+            // 初始化音频处理器
+            const processorInitialized = await this.processor.initializeAnalyser(this.audioContext, this.mediaStreamSource);
+            if (!processorInitialized) {
+                throw new Error('音频处理器初始化失败');
             }
             
-            // 计算加权RMS并标准化
-            let volume = Math.sqrt(sum / count);
-            volume = Math.max(0, Math.min(1, volume * 8));  // 增加灵敏度
+            // 初始化音频控制器
+            const controllerInitialized = await this.controller.initialize(stream);
+            if (!controllerInitialized) {
+                throw new Error('音频控制器初始化失败');
+            }
+
+            // 开始音频处理循环
+            this.startAudioProcessing();
             
-            // 应用平滑处理
-            volume = this.lastVolume * this.volumeSmoothing + 
-                    volume * (1 - this.volumeSmoothing);
-            this.lastVolume = volume;
-
-            // 更新持续音量
-            this.sustainedVolume = Math.max(0, this.sustainedVolume * 0.95 + volume * 0.05);
-
-            return volume;
+            this.log('音频流设置成功');
+            
+            // 开启调试模式以便观察音频数据
+            if (this.debugMode) {
+                this.processor.toggleDebug();
+                this.controller.toggleDebug();
+            }
+            
+            return true;
         } catch (error) {
-            this.log(`音量计算错误: ${error.message}`);
-            return 0;
+            this.log(`音频流设置错误: ${error.message}`);
+            return false;
         }
     }
 
-    getSustainedVolume() {
-        return this.sustainedVolume;
-    }
+    startAudioProcessing() {
+        // 清理现有的处理间隔
+        if (this.processingInterval) {
+            clearInterval(this.processingInterval);
+        }
 
-    getFrequencyWeight(bin, startBin, endBin) {
-        // 创建一个权重曲线，强调人声频率
-        const normalizedBin = (bin - startBin) / (endBin - startBin);
-        // 在1kHz附近峰值（归一化约0.3）
-        return Math.exp(-Math.pow((normalizedBin - 0.3) * 3, 2));
-    }
-
-    getPitchLevel() {
-        if (!this.isInitialized || !this.analyser) return 0;
-
-        try {
-            this.analyser.getFloatFrequencyData(this.pitchData);
-            
-            // 在高频范围内寻找主导频率
-            let maxAmplitude = -Infinity;
-            let dominantBin = 0;
-            
-            // 关注高频范围 (1kHz - 4kHz)
-            const startBin = Math.floor(this.pitchData.length * 0.2);  // ~1000Hz
-            const endBin = Math.floor(this.pitchData.length * 0.8);    // ~4000Hz
-            
-            for (let i = startBin; i < endBin; i++) {
-                // 应用频率权重
-                const weight = this.getFrequencyWeight(i, startBin, endBin);
-                const weightedAmplitude = this.pitchData[i] * weight;
-                
-                if (weightedAmplitude > maxAmplitude) {
-                    maxAmplitude = weightedAmplitude;
-                    dominantBin = i;
+        // 设置新的处理间隔
+        this.processingInterval = setInterval(() => {
+            try {
+                if (!this.processor || !this.controller) {
+                    throw new Error('音频处理组件未初始化');
                 }
-            }
-            
-            // 标准化音高级别
-            let pitch = (dominantBin - startBin) / (endBin - startBin);
-            pitch = Math.max(0, Math.min(1, pitch * 1.5));  // 增加灵敏度
-            
-            // 应用平滑处理
-            pitch = this.lastPitch * this.pitchSmoothing + 
-                   pitch * (1 - this.pitchSmoothing);
-            this.lastPitch = pitch;
 
-            return pitch;
-        } catch (error) {
-            this.log(`音高计算错误: ${error.message}`);
-            return 0;
-        }
+                // 获取音频分析数据
+                const volume = this.processor.getVolumeLevel();
+                const pitch = this.processor.getPitchLevel();
+
+                // 更新控制器的音量和音高值
+                this.controller.setVolumeLevel(volume);
+                this.controller.setPitchLevel(pitch);
+
+                // Debug output
+                if (this.debugMode && (volume > 0.1 || pitch > 0.1)) {
+                    this.log(`处理中 - 音量: ${volume.toFixed(3)}, 音高: ${pitch.toFixed(3)}`);
+                }
+
+            } catch (error) {
+                this.log(`音频处理错误: ${error.message}`);
+                console.error('Audio processing error:', error);
+            }
+        }, 16); // 约60fps的更新率
     }
 
-    async cleanup() {
+    cleanup() {
         try {
+            // 停止音频处理
+            if (this.processingInterval) {
+                clearInterval(this.processingInterval);
+                this.processingInterval = null;
+            }
+
+            // 停止音频流
+            if (this.mediaStreamSource && this.mediaStreamSource.mediaStream) {
+                const tracks = this.mediaStreamSource.mediaStream.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+
+            // 清理音频上下文
             if (this.audioContext) {
-                await this.audioContext.close();
+                this.audioContext.close();
                 this.audioContext = null;
             }
-            this.analyser = null;
+
+            // 清理控制器
+            if (this.controller) {
+                this.controller.cleanup();
+            }
+
             this.mediaStreamSource = null;
+            this.analyser = null;
             this.isInitialized = false;
-            this.lastVolume = 0;
-            this.lastPitch = 0;
-            this.sustainedVolume = 0;
-            this.log('音频控制器已清理');
+            this.log('音频系统已清理');
         } catch (error) {
-            this.log(`音频控制器清理错误: ${error.message}`);
-            throw error;
+            this.log(`音频系统清理错误: ${error.message}`);
+            console.error('Audio cleanup error:', error);
         }
+    }
+
+    toggleDebug() {
+        this.debugMode = !this.debugMode;
+        if (this.processor) {
+            this.processor.toggleDebug();
+        }
+        if (this.controller) {
+            this.controller.toggleDebug();
+        }
+        this.log(`音频系统调试: ${this.debugMode ? '开启' : '关闭'}`);
     }
 }
 
-// 创建全局实例
-window.audioController = new AudioController();
+// 导出音频类
+window.GameAudio = GameAudio;
+
+// 创建全局音频系统实例
+window.audioSystem = new GameAudio();
+
+// 确保类和实例都已创建
+console.log('GameAudio class and audioSystem instance created');

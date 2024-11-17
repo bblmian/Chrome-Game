@@ -68,40 +68,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             startButton.disabled = true;
             downloadButton.disabled = true;
 
-            // Request permissions
-            log('请求权限...');
-            let stream;
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    audio: true,
-                    video: {
-                        width: canvas.width,
-                        height: canvas.height,
-                        facingMode: 'user'
-                    }
-                });
-                log('权限获取成功');
-            } catch (error) {
-                if (error.name === 'NotAllowedError') {
-                    throw new Error('需要麦克风和摄像头权限才能玩游戏。请允许权限后重试。');
-                } else if (error.name === 'NotFoundError') {
-                    throw new Error('未检测到麦克风或摄像头。请确保设备已正确连接。');
-                } else if (error.name === 'NotReadableError') {
-                    throw new Error('无法访问麦克风或摄像头。请确保没有其他程序正在使用这些设备。');
-                } else {
-                    throw new Error(`设备访问错误: ${error.message}`);
-                }
-            }
-
-            // Initialize audio
-            log('初始化音频...');
-            if (!window.audioController) {
-                throw new Error('音频控制器未找到');
-            }
-            await window.audioController.initialize(stream);
-
-            // Start game
-            log('启动游戏...');
+            // Start game through game instance
             await game.handleStartClick();
             log('游戏启动成功');
 

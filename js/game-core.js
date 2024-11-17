@@ -59,6 +59,17 @@ class GameCore {
         try {
             this.log('初始化游戏组件...');
 
+            // Verify audio system is ready
+            if (!window.audioSystem) {
+                throw new Error('AudioSystem not found');
+            }
+            if (!window.audioSystem.isInitialized) {
+                throw new Error('AudioSystem not initialized');
+            }
+            if (!window.audioSystem.controller) {
+                throw new Error('AudioController not initialized');
+            }
+
             // Initialize components in order
             this.log('初始化背景...');
             this.background = new GameBackground(this.canvas);
@@ -67,11 +78,8 @@ class GameCore {
             this.log('初始化游戏状态...');
             this.state = new GameState();
             
-            this.log('初始化音频控制...');
-            if (!window.audioController) {
-                throw new Error('AudioController not initialized');
-            }
-            this.input = new GameInput(window.audioController);
+            this.log('初始化音频输入...');
+            this.input = new GameInput();
             
             this.log('初始化UI...');
             this.ui = new GameUI(this.canvas);
@@ -99,6 +107,11 @@ class GameCore {
             this.isGameEnding = false;
             this.state.setState('MENU');
 
+            // Enable debug mode if needed
+            if (this.debugMode) {
+                window.audioSystem.toggleDebug();
+            }
+
             this.log('游戏组件初始化成功');
             return true;
         } catch (error) {
@@ -115,22 +128,18 @@ class GameCore {
 
             // Only update game logic if in PLAYING state
             if (this.state.isState('PLAYING')) {
-                // Get raw audio input first
-                const rawVolume = this.input.audioController.getVolumeLevel();
-                const rawPitch = this.input.audioController.getPitchLevel();
-
-                // Update UI with raw values for responsive feedback
-                this.ui.setVolume(rawVolume);
-                this.ui.setPitch(rawPitch);
-
                 // Get processed input for game control
                 const input = this.input.update();
+
+                // Update UI with input values
+                this.ui.setVolume(input.volume);
+                this.ui.setPitch(input.pitch);
 
                 // Update chicken movement based on input
                 if (input.isMoving) {
                     this.chicken.move(input.speed);
                     this.state.updateDistance(this.chicken.x);
-                    if (Math.random() < 0.05) {
+                    if (this.debugMode && Math.random() < 0.05) {
                         this.log(`小鸡位置: (${Math.round(this.chicken.x)}, ${Math.round(this.chicken.y)}), ` +
                                 `速度: (${Math.round(this.chicken.velocityX)}, ${Math.round(this.chicken.velocityY)})`);
                     }
@@ -140,7 +149,9 @@ class GameCore {
                 if (input.isJumping) {
                     if (!this.chicken.isJumping) {
                         this.chicken.jump(input.jumpForce);
-                        this.log(`跳跃 - 力度: ${input.jumpForce}`);
+                        if (this.debugMode) {
+                            this.log(`跳跃 - 力度: ${input.jumpForce}`);
+                        }
                     } else if (input.volume > this.input.movementController.sustainThreshold) {
                         this.chicken.jump(input.jumpForce);
                     }
@@ -221,6 +232,9 @@ class GameCore {
         this.showColliders = !this.showColliders;
         if (this.renderer) {
             this.renderer.toggleDebugMode();
+        }
+        if (window.audioSystem) {
+            window.audioSystem.toggleDebug();
         }
         this.log(`调试模式: ${this.debugMode ? '开启' : '关闭'}`);
     }

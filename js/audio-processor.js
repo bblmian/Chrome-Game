@@ -27,8 +27,8 @@ class AudioProcessor {
         this.pitchThreshold = 0.1;       // Lower pitch threshold
         
         // Amplification
-        this.volumeAmplification = 1.8;  // Increased volume amplification
-        this.pitchAmplification = 2.0;   // Further increased pitch amplification
+        this.volumeAmplification = 2.0;  // Increased volume amplification
+        this.pitchAmplification = 2.5;   // Further increased pitch amplification
         
         // Debug logging
         this.debug = document.getElementById('debug');
@@ -96,8 +96,8 @@ class AudioProcessor {
                 this.lastVolume > this.volumeThreshold ? this.lastVolume : 0
             ));
 
-            if (this.debugMode && normalizedVolume > 0) {
-                this.log(`音量: ${normalizedVolume.toFixed(3)}`);
+            if (this.debugMode && normalizedVolume > 0.1) {
+                this.log(`原始音量: ${normalizedVolume.toFixed(3)}`);
             }
 
             return normalizedVolume;
@@ -144,8 +144,8 @@ class AudioProcessor {
                 this.lastPitch > this.pitchThreshold ? this.lastPitch : 0
             ));
 
-            if (this.debugMode && normalizedPitch > 0) {
-                this.log(`音高: ${normalizedPitch.toFixed(3)}`);
+            if (this.debugMode && normalizedPitch > 0.1) {
+                this.log(`原始音高: ${normalizedPitch.toFixed(3)}`);
             }
 
             return normalizedPitch;
