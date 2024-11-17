@@ -7,6 +7,10 @@ class GameBackground {
         
         // Background settings
         this.overlayColor = 'rgba(255, 255, 255, 0.3)';  // Lighter overlay
+        
+        // Video dimensions
+        this.videoWidth = 0;
+        this.videoHeight = 0;
     }
 
     log(message) {
@@ -35,11 +39,11 @@ class GameBackground {
             this.video.playsInline = true;
             document.body.appendChild(this.video);
 
-            // Get camera stream
+            // Get camera stream with ideal resolution
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
-                    width: this.canvas.width,
-                    height: this.canvas.height,
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
                     facingMode: 'user'  // Use front camera
                 }
             });
@@ -48,12 +52,14 @@ class GameBackground {
             this.video.srcObject = stream;
             await this.video.play();
 
+            // Store video dimensions
+            const settings = stream.getVideoTracks()[0].getSettings();
+            this.videoWidth = settings.width;
+            this.videoHeight = settings.height;
+
             this.isInitialized = true;
             this.log('视频背景初始化成功');
-
-            // Log video dimensions
-            const settings = stream.getVideoTracks()[0].getSettings();
-            this.log(`视频分辨率: ${settings.width}x${settings.height}`);
+            this.log(`视频分辨率: ${this.videoWidth}x${this.videoHeight}`);
             window.debugUtils?.updateVideoStatus('active', settings);
 
         } catch (error) {
@@ -63,6 +69,31 @@ class GameBackground {
         }
     }
 
+    calculateVideoDimensions() {
+        if (!this.video || !this.videoWidth || !this.videoHeight) return null;
+
+        const canvasRatio = this.canvas.width / this.canvas.height;
+        const videoRatio = this.videoWidth / this.videoHeight;
+
+        let drawWidth, drawHeight, x, y;
+
+        if (canvasRatio > videoRatio) {
+            // Canvas is wider than video
+            drawWidth = this.canvas.width;
+            drawHeight = this.canvas.width / videoRatio;
+            x = 0;
+            y = (this.canvas.height - drawHeight) / 2;
+        } else {
+            // Canvas is taller than video
+            drawHeight = this.canvas.height;
+            drawWidth = this.canvas.height * videoRatio;
+            x = (this.canvas.width - drawWidth) / 2;
+            y = 0;
+        }
+
+        return { x, y, width: drawWidth, height: drawHeight };
+    }
+
     draw(ctx) {
         if (!this.isInitialized || !this.video) return;
 
@@ -70,15 +101,25 @@ class GameBackground {
             // Save context state
             ctx.save();
             
+            // Clear the canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+            // Calculate video dimensions
+            const dimensions = this.calculateVideoDimensions();
+            if (!dimensions) return;
+            
             // Mirror the video horizontally for more intuitive interaction
             ctx.scale(-1, 1);
             ctx.translate(-this.canvas.width, 0);
             
-            // Draw video frame
+            // Draw video frame with calculated dimensions
             ctx.drawImage(
                 this.video,
-                0, 0,
-                this.canvas.width, this.canvas.height
+                dimensions.x,
+                dimensions.y,
+                dimensions.width,
+                dimensions.height
             );
             
             // Restore context for normal drawing
@@ -122,6 +163,8 @@ class GameBackground {
         }
         this.video = null;
         this.isInitialized = false;
+        this.videoWidth = 0;
+        this.videoHeight = 0;
         this.log('视频背景已清理');
     }
 
