@@ -23,6 +23,43 @@ class GameManager extends GameManagerBase {
         }
     }
 
+    handleResize(width, height) {
+        try {
+            this.log(`处理画布大小变化: ${width}x${height}`);
+            
+            if (!this.gameCore) {
+                return;
+            }
+
+            // Update canvas size
+            this.canvas.width = width;
+            this.canvas.height = height;
+
+            // Update game core components
+            if (this.gameCore.camera) {
+                this.gameCore.camera.updateViewport(width, height);
+            }
+
+            if (this.gameCore.renderer) {
+                this.gameCore.renderer.updateCanvasSize(width, height);
+            }
+
+            if (this.gameCore.background) {
+                this.gameCore.background.resize(width, height);
+            }
+
+            // Force a redraw
+            if (this.gameCore.renderer) {
+                this.gameCore.renderer.render();
+            }
+
+            this.log('画布大小调整完成');
+        } catch (error) {
+            this.log(`画布大小调整错误: ${error.message}`);
+            console.error(error);
+        }
+    }
+
     async start() {
         try {
             this.log('开始初始化游戏管理器...');

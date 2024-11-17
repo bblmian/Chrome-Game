@@ -1,39 +1,42 @@
 body {
     margin: 0;
-    padding: 20px;
+    padding: 10px;
     background-color: #87CEEB;
     font-family: Arial, sans-serif;
 }
 
 .game-content {
-    max-width: 1000px;
+    max-width: 100%;
     margin: 0 auto;
     text-align: center;
+    padding: 0 10px;
 }
 
 .banner {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .banner img {
-    width: 600px;  /* 游戏舞台宽度800px的四分之三 */
+    width: 100%;
+    max-width: 600px;
     height: auto;
 }
 
 .game-wrapper {
     position: relative;
     margin: 0 auto;
-    width: fit-content;
+    width: 100%;
+    max-width: 800px;
 }
 
 .game-border {
     position: absolute;
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
-    border: 10px solid #333;
-    border-radius: 15px;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border: 5px solid #333;
+    border-radius: 10px;
     pointer-events: none;
 }
 
@@ -42,35 +45,40 @@ body {
     overflow: hidden;
     border-radius: 5px;
     background-color: #000;
+    width: 100%;
+    padding-top: 50%; /* 2:1 aspect ratio */
 }
 
 canvas {
     display: block;
-    position: relative;
-    z-index: 2;  /* 提高画布层级，确保在海浪之上 */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
 }
 
-/* 海浪层样式 */
 .wave-overlay {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 20%;  /* 舞台高度的五分之一 */
-    background-color: #ADD8E6;  /* 浅蓝色海浪 */
-    opacity: 0.6;  /* 半透明效果 */
-    z-index: 1;  /* 确保在视频水印层之下 */
-    pointer-events: none;  /* 不影响交互 */
+    height: 20%;
+    background-color: #ADD8E6;
+    opacity: 0.6;
+    z-index: 1;
+    pointer-events: none;
 }
 
 .button-container {
-    margin: 20px 0;
+    margin: 15px 0;
 }
 
 button {
-    padding: 10px 20px;
-    margin: 0 10px;
-    font-size: 16px;
+    padding: 8px 16px;
+    margin: 5px;
+    font-size: 14px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -89,9 +97,10 @@ button:disabled {
 }
 
 .instructions {
-    margin: 20px auto;
+    margin: 15px auto;
+    width: 100%;
     max-width: 600px;
-    padding: 20px;
+    padding: 15px;
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -100,11 +109,13 @@ button:disabled {
 .instructions h2 {
     margin-top: 0;
     color: #333;
+    font-size: 1.2em;
 }
 
 .instructions p {
-    margin: 10px 0;
+    margin: 8px 0;
     color: #666;
+    font-size: 0.9em;
 }
 
 #debug {
@@ -122,4 +133,51 @@ button:disabled {
     z-index: 1000;
     border-radius: 5px;
     display: none;
+}
+
+/* Mobile-specific styles */
+@media screen and (max-width: 480px) {
+    body {
+        padding: 5px;
+    }
+
+    .game-content {
+        padding: 0 5px;
+    }
+
+    .game-border {
+        border-width: 3px;
+        top: -3px;
+        left: -3px;
+        right: -3px;
+        bottom: -3px;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        margin: 5px;
+        width: calc(50% - 10px);
+        max-width: 150px;
+    }
+
+    .instructions {
+        padding: 10px;
+        margin: 10px auto;
+    }
+
+    .instructions h2 {
+        font-size: 1.1em;
+    }
+
+    .instructions p {
+        font-size: 0.85em;
+        margin: 6px 0;
+    }
+
+    #debug {
+        width: 200px;
+        height: 150px;
+        font-size: 10px;
+    }
 }

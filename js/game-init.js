@@ -18,11 +18,40 @@ document.addEventListener('DOMContentLoaded', async function() {
     const startButton = document.getElementById('startButton');
     const downloadButton = document.getElementById('downloadButton');
     const canvas = document.getElementById('gameCanvas');
+    const gameContainer = document.querySelector('.game-container');
 
-    if (!startButton || !downloadButton || !canvas) {
+    if (!startButton || !downloadButton || !canvas || !gameContainer) {
         log('Required UI elements not found', 'error');
         return;
     }
+
+    // Function to update canvas size
+    function updateCanvasSize() {
+        const containerWidth = gameContainer.clientWidth;
+        const containerHeight = gameContainer.clientHeight;
+        
+        // Set canvas size maintaining 2:1 aspect ratio
+        canvas.width = containerWidth;
+        canvas.height = containerWidth * 0.5; // 2:1 ratio
+
+        // Update game rendering if game exists
+        if (window.game && window.game.manager) {
+            window.game.manager.handleResize(canvas.width, canvas.height);
+        }
+
+        log(`Canvas resized to ${canvas.width}x${canvas.height}`);
+    }
+
+    // Set initial canvas size
+    updateCanvasSize();
+
+    // Add resize event listener
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        // Debounce resize event
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(updateCanvasSize, 250);
+    });
 
     // Verify required classes
     const requiredClasses = [
@@ -140,6 +169,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             startButton.click();
         }
     };
+
+    // Handle orientation change for mobile devices
+    window.addEventListener('orientationchange', function() {
+        setTimeout(updateCanvasSize, 300); // Wait for orientation change to complete
+    });
 
     log('事件监听器已设置');
 });
