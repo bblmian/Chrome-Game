@@ -1,72 +1,87 @@
-// 微信小游戏适配器
-export default class WeappAdapter {
-  constructor() {
-    this.canvas = wx.createCanvas()
-    this.initWebAudio()
-    this.initDocument()
-    this.initWindow()
-  }
+// 创建全局window对象
+const global = GameGlobal
 
-  initWebAudio() {
-    // Web Audio API适配
-    if (!window.AudioContext) {
-      window.AudioContext = function() {
-        return wx.createWebAudioContext()
-      }
-    }
-  }
-
-  initDocument() {
-    // Document对象适配
-    if (!window.document) {
-      window.document = {
-        createElement(tagName) {
-          if (tagName === 'canvas') {
-            return wx.createCanvas()
-          }
-          if (tagName === 'audio') {
-            return wx.createInnerAudioContext()
-          }
-          return null
-        },
-        createElementNS(ns, tagName) {
-          return this.createElement(tagName)
+function inject() {
+  const window = {
+    canvas: wx.createCanvas(),
+    navigator: {
+      userAgent: 'micromessenger'
+    },
+    document: {
+      createElement(tagName) {
+        if (tagName === 'canvas') {
+          return wx.createCanvas()
+        } else if (tagName === 'audio') {
+          return wx.createInnerAudioContext()
         }
+        return null
+      },
+      createElementNS(ns, tagName) {
+        return this.createElement(tagName)
+      }
+    },
+    location: {
+      href: 'game.js'
+    },
+    requestAnimationFrame(cb) {
+      return setTimeout(cb, 1000 / 60)
+    },
+    cancelAnimationFrame(id) {
+      return clearTimeout(id)
+    },
+    localStorage: {
+      getItem(key) {
+        return wx.getStorageSync(key)
+      },
+      setItem(key, value) {
+        wx.setStorageSync(key, value)
+      },
+      removeItem(key) {
+        wx.removeStorageSync(key)
+      },
+      clear() {
+        wx.clearStorageSync()
+      }
+    },
+    WebGLRenderingContext: {},
+    AudioContext: function() {
+      return wx.createWebAudioContext()
+    },
+    Image: function() {
+      const image = wx.createImage()
+      return image
+    },
+    TouchEvent: class TouchEvent {
+      constructor(type, options = {}) {
+        this.type = type
+        this.touches = options.touches || []
+        this.changedTouches = options.changedTouches || []
+        this.timeStamp = options.timeStamp || Date.now()
       }
     }
   }
 
-  initWindow() {
-    // Window对象适配
-    if (!window.requestAnimationFrame) {
-      window.requestAnimationFrame = callback => {
-        return setTimeout(callback, 1000 / 60)
-      }
-    }
+  // 将window对象的属性复制到全局
+  Object.keys(window).forEach(key => {
+    global[key] = window[key]
+  })
 
-    if (!window.cancelAnimationFrame) {
-      window.cancelAnimationFrame = id => {
-        clearTimeout(id)
-      }
-    }
+  // 将window对象设置为全局对象
+  global.window = window
+  window.window = window
 
-    // 事件对象适配
-    if (!window.TouchEvent) {
-      window.TouchEvent = class TouchEvent {
-        constructor(type, options = {}) {
-          this.type = type
-          this.touches = options.touches || []
-          this.changedTouches = options.changedTouches || []
-          this.timeStamp = options.timeStamp || Date.now()
-        }
-      }
-    }
-  }
+  return window
 }
 
-// 初始化适配器
-new WeappAdapter()
+// 执行注入
+const window = inject()
 
 // 导出全局对象
-export const canvas = wx.createCanvas()
+export default window
+export const canvas = window.canvas
+export const document = window.document
+export const navigator = window.navigator
+export const requestAnimationFrame = window.requestAnimationFrame
+export const cancelAnimationFrame = window.cancelAnimationFrame
+export const localStorage = window.localStorage
 export const TouchEvent = window.TouchEvent

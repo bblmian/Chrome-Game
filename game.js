@@ -1,6 +1,13 @@
-import './js/libs/weapp-adapter'
+// 首先导入适配器
+import window from './js/libs/weapp-adapter'
 import './js/libs/symbol'
 
+// 确保GameGlobal和window都存在
+const global = GameGlobal
+global.window = window
+window.global = global
+
+// 创建画布
 const canvas = wx.createCanvas()
 const ctx = canvas.getContext('2d')
 const gameWidth = canvas.width
@@ -27,6 +34,7 @@ const CONFIG = {
 
 class Game {
   constructor() {
+    // 初始化游戏属性
     this.canvas = canvas
     this.ctx = ctx
     this.state = GAME_STATE.READY
@@ -49,7 +57,10 @@ class Game {
       pitchLevel: 0
     }
 
-    this.init()
+    // 启动游戏
+    wx.onShow(() => {
+      this.init()
+    })
   }
 
   async init() {
