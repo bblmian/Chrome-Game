@@ -45,7 +45,8 @@ class GameRecorder {
         // Create progress container
         const progressContainer = document.createElement('div');
         Object.assign(progressContainer.style, {
-            width: '300px',
+            width: '80%',
+            maxWidth: '300px',
             backgroundColor: 'rgba(255, 255, 255, 0.1)',
             borderRadius: '10px',
             padding: '20px',
@@ -122,10 +123,11 @@ class GameRecorder {
             const tracks = [...this.stream.getTracks(), ...audioStream.getTracks()];
             const combinedStream = new MediaStream(tracks);
 
-            // Create media recorder
+            // Create media recorder with lower quality for mobile
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             this.mediaRecorder = new MediaRecorder(combinedStream, {
                 mimeType: 'video/webm;codecs=vp9',
-                videoBitsPerSecond: 2500000 // 2.5 Mbps
+                videoBitsPerSecond: isMobile ? 1500000 : 2500000 // 1.5 Mbps for mobile, 2.5 Mbps for desktop
             });
 
             // Set up recording handlers
@@ -218,27 +220,115 @@ class GameRecorder {
         }
 
         try {
-            // Create download link
-            const url = URL.createObjectURL(this.recordedBlob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = `游戏录像_${new Date().toISOString().slice(0,19).replace(/[:-]/g, '')}.webm`;
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
             
-            // Trigger download
-            document.body.appendChild(a);
-            a.click();
-            
-            // Clean up
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }, 100);
+            // Create download overlay
+            const overlay = document.createElement('div');
+            Object.assign(overlay.style, {
+                position: 'fixed',
+                top: '0',
+                left: '0',
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: '1000',
+                padding: '20px',
+                boxSizing: 'border-box'
+            });
 
-            this.log('录像下载已开始');
+            // Create content container
+            const container = document.createElement('div');
+            Object.assign(container.style, {
+                backgroundColor: 'white',
+                padding: '20px',
+                borderRadius: '10px',
+                maxWidth: '90%',
+                width: '300px',
+                textAlign: 'center'
+            });
+
+            if (isIOS) {
+                // For iOS devices, create a video player
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(this.recordedBlob);
+                video.controls = true;
+                Object.assign(video.style, {
+                    width: '100%',
+                    marginBottom: '15px',
+                    borderRadius: '5px'
+                });
+                
+                const text = document.createElement('p');
+                text.textContent = '请长按视频选择"保存视频"';
+                Object.assign(text.style, {
+                    margin: '10px 0',
+                    color: '#666'
+                });
+
+                container.appendChild(video);
+                container.appendChild(text);
+            } else {
+                // For other devices, use direct download
+                const downloadBtn = document.createElement('button');
+                downloadBtn.textContent = '点击下载视频';
+                Object.assign(downloadBtn.style, {
+                    padding: '12px 24px',
+                    fontSize: '16px',
+                    backgroundColor: '#4CAF50',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    marginBottom: '10px',
+                    width: '100%'
+                });
+
+                downloadBtn.onclick = () => {
+                    const url = URL.createObjectURL(this.recordedBlob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `游戏录像_${new Date().toISOString().slice(0,19).replace(/[:-]/g, '')}.webm`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                };
+
+                container.appendChild(downloadBtn);
+            }
+
+            // Add close button
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = '关闭';
+            Object.assign(closeBtn.style, {
+                padding: '12px 24px',
+                fontSize: '16px',
+                backgroundColor: '#666',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                width: '100%'
+            });
+
+            closeBtn.onclick = () => {
+                document.body.removeChild(overlay);
+            };
+
+            container.appendChild(closeBtn);
+            overlay.appendChild(container);
+            document.body.appendChild(overlay);
+
+            this.log('显示下载界面');
         } catch (error) {
             this.log(`下载录像错误: ${error.message}`);
             console.error('Download error:', error);
+            
+            // Show error message
+            alert('视频下载失败，请重试');
         }
     }
 

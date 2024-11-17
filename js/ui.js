@@ -2,6 +2,10 @@ class GameUI {
     constructor(canvas) {
         this.canvas = canvas;
         
+        // Base dimensions (original design size)
+        this.baseWidth = 800;
+        this.baseHeight = 400;
+        
         // Volume meter properties
         this.volumeBarHeight = 150;
         this.volumeBarWidth = 30;
@@ -46,7 +50,7 @@ class GameUI {
         this.targetPitchLevel = pitch;
     }
 
-    drawVolumeBar(ctx) {
+    drawVolumeBar(ctx, scale = 1) {
         const height = this.volumeBarHeight * this.volumeLevel;
         const radius = this.volumeBarRadius;
 
@@ -111,7 +115,7 @@ class GameUI {
         // Draw threshold markers with labels
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.font = '10px Arial';
+        ctx.font = `${10}px Arial`;
         ctx.textAlign = 'right';
         ctx.lineWidth = 1;
         
@@ -156,7 +160,7 @@ class GameUI {
         ctx.shadowOffsetY = 1;
         
         ctx.fillStyle = 'white';
-        ctx.font = '14px Arial';
+        ctx.font = `${14}px Arial`;
         ctx.textAlign = 'left';
         ctx.fillText(
             `时间: ${Math.floor(time)}秒`,
@@ -203,7 +207,7 @@ class GameUI {
         ctx.shadowOffsetY = 2;
         
         ctx.fillStyle = 'white';
-        ctx.font = 'bold 16px Arial';
+        ctx.font = `bold ${16}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         

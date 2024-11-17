@@ -14,6 +14,11 @@ class GameRenderer {
         this.showColliders = false;
         this.showDebugInfo = false;
 
+        // Base dimensions (original design size)
+        this.baseWidth = 800;
+        this.baseHeight = 400;
+        this.scale = 1;
+
         // 加载水印图片
         this.watermark = new Image();
         this.watermark.src = 'assets/banner.png';
@@ -32,6 +37,9 @@ class GameRenderer {
 
         // 水印设置
         this.watermarkPadding = 20; // 增加边距
+
+        // Calculate initial scale
+        this.updateScale();
     }
 
     log(message) {
@@ -42,6 +50,14 @@ class GameRenderer {
         }
     }
 
+    updateScale() {
+        // Calculate scale based on canvas size
+        const scaleX = this.canvas.width / this.baseWidth;
+        const scaleY = this.canvas.height / this.baseHeight;
+        this.scale = Math.min(scaleX, scaleY);
+        this.log(`更新缩放比例: ${this.scale}`);
+    }
+
     clear() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
@@ -50,6 +66,17 @@ class GameRenderer {
         try {
             // Clear canvas
             this.clear();
+
+            // Save the context state
+            this.ctx.save();
+
+            // Scale everything
+            this.ctx.scale(this.scale, this.scale);
+
+            // Center the game view
+            const offsetX = (this.canvas.width / this.scale - this.baseWidth) / 2;
+            const offsetY = (this.canvas.height / this.scale - this.baseHeight) / 2;
+            this.ctx.translate(offsetX, offsetY);
 
             // Draw video background
             background.draw(this.ctx);
@@ -95,7 +122,7 @@ class GameRenderer {
 
                 // Draw UI elements
                 if (ui) {
-                    ui.drawVolumeBar(this.ctx);
+                    ui.drawVolumeBar(this.ctx, this.scale);
                     if (gameState.isState('PLAYING')) {
                         ui.drawStats(this.ctx, gameState.gameTime, gameState.gameDistance);
                     }
@@ -109,15 +136,18 @@ class GameRenderer {
                     gameState.isState('WIN') ?
                         '恭喜过关！\n点击重新开始' :
                         '游戏结束\n点击重新开始';
-                ui.drawMessage(this.ctx, message, this.canvas.width/2, this.canvas.height/2);
+                ui.drawMessage(this.ctx, message, this.baseWidth/2, this.baseHeight/2);
             }
 
-            // Draw debug info
+            // Restore the context state
+            this.ctx.restore();
+
+            // Draw debug info (in screen space)
             if (this.showDebugInfo) {
                 this.drawDebugInfo(gameState, chicken, camera);
             }
 
-            // Draw watermark
+            // Draw watermark (in screen space)
             this.drawWatermark();
 
         } catch (error) {
@@ -144,32 +174,27 @@ class GameRenderer {
                 // 设置水印透明度
                 this.ctx.globalAlpha = 0.7;
                 
-                // 计算水印位置（右下角）
-                const x = this.canvas.width - this.watermarkWidth - this.watermarkPadding;
-                const y = this.canvas.height - this.watermarkHeight - this.watermarkPadding;
+                // 计算水印位置（右下角），考虑缩放
+                const scaledWatermarkWidth = this.watermarkWidth * this.scale;
+                const scaledWatermarkHeight = this.watermarkHeight * this.scale;
+                const scaledPadding = this.watermarkPadding * this.scale;
+                
+                const x = this.canvas.width - scaledWatermarkWidth - scaledPadding;
+                const y = this.canvas.height - scaledWatermarkHeight - scaledPadding;
                 
                 // 绘制水印
                 this.ctx.drawImage(
                     this.watermark,
                     x, y,
-                    this.watermarkWidth,
-                    this.watermarkHeight
+                    scaledWatermarkWidth,
+                    scaledWatermarkHeight
                 );
                 
-                // Debug: 记录水印位置
-                if (Math.random() < 0.01) {  // 偶尔记录一下
-                    this.log(`水印位置: (${x}, ${y}), 尺寸: ${this.watermarkWidth}x${this.watermarkHeight}`);
-                }
             } catch (error) {
                 this.log(`水印绘制错误: ${error.message}`);
             }
             
             this.ctx.restore();
-        } else {
-            // Debug: 记录水印未加载
-            if (Math.random() < 0.01) {  // 偶尔记录一下
-                this.log('水印图片未加载完成');
-            }
         }
     }
 
@@ -178,13 +203,20 @@ class GameRenderer {
 
         this.ctx.save();
         
+        // Scale debug info
+        const fontSize = 12 * this.scale;
+        const padding = 10 * this.scale;
+        const lineHeight = 15 * this.scale;
+        const panelWidth = 250 * this.scale;
+        const panelHeight = 90 * this.scale;
+        
         // Draw debug panel background
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        this.ctx.fillRect(10, this.canvas.height - 100, 250, 90);
+        this.ctx.fillRect(padding, this.canvas.height - panelHeight - padding, panelWidth, panelHeight);
         
         // Draw debug text
         this.ctx.fillStyle = 'white';
-        this.ctx.font = '12px monospace';
+        this.ctx.font = `${fontSize}px monospace`;
         this.ctx.textAlign = 'left';
         
         const debugInfo = [
@@ -196,7 +228,11 @@ class GameRenderer {
         ];
 
         debugInfo.forEach((text, index) => {
-            this.ctx.fillText(text, 20, this.canvas.height - 80 + index * 15);
+            this.ctx.fillText(
+                text, 
+                padding * 2, 
+                this.canvas.height - panelHeight + (index + 1) * lineHeight
+            );
         });
 
         this.ctx.restore();
@@ -211,6 +247,7 @@ class GameRenderer {
     resize(width, height) {
         this.canvas.width = width;
         this.canvas.height = height;
+        this.updateScale();
     }
 }
 
