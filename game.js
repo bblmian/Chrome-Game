@@ -13,6 +13,18 @@ const ctx = canvas.getContext('2d')
 const gameWidth = canvas.width
 const gameHeight = canvas.height
 
+// 创建视频元素
+const video = wx.createVideo({
+  x: 0,
+  y: 0,
+  width: gameWidth,
+  height: gameHeight,
+  objectFit: 'cover',
+  devicePosition: 'front',
+  live: true,
+  muted: true
+})
+
 // 游戏状态
 const GAME_STATE = {
   READY: 'ready',
@@ -29,14 +41,16 @@ const CONFIG = {
   fps: 60,
   gravity: 980,
   chickenSpeed: 300,
-  jumpForce: -500
+  jumpForce: -500,
+  tiltThreshold: 0.1,  // 倾斜阈值
+  tiltSensitivity: 300 // 倾斜灵敏度
 }
 
 class Game {
   constructor() {
-    // 初始化游戏属性
     this.canvas = canvas
     this.ctx = ctx
+    this.video = video
     this.state = GAME_STATE.READY
     this.gameObjects = {
       chicken: null,
@@ -46,7 +60,6 @@ class Game {
     }
     this.systems = {
       recorder: null,
-      camera: null,
       frameTimer: null,
       lastFrameTime: 0
     }
@@ -54,7 +67,8 @@ class Game {
       gameTime: 0,
       distance: 0,
       volumeLevel: 0,
-      pitchLevel: 0
+      pitchLevel: 0,
+      usingTilt: false  // 是否正在使用倾斜控制
     }
 
     // 启动游戏
@@ -65,7 +79,7 @@ class Game {
 
   async init() {
     try {
-      await this.initCamera()
+      await this.initVideo()
       await this.initAudio()
       this.initGameObjects()
       this.bindEvents()
@@ -79,39 +93,22 @@ class Game {
     }
   }
 
-  async initCamera() {
+  async initVideo() {
     try {
       // 检查相机权限
       await wx.authorize({ scope: 'scope.camera' })
 
-      // 创建相机
-      const camera = wx.createCamera({
-        x: 0,
-        y: 0,
-        width: gameWidth,
-        height: gameHeight,
-        devicePosition: 'front',
-        flash: 'off',
-        success: () => {
-          console.log('Camera created successfully')
-          this.systems.camera = camera
-          // 启动相机预览
-          camera.start({
-            success: () => {
-              console.log('Camera preview started')
-            },
-            fail: (error) => {
-              console.error('Camera preview failed:', error)
-            }
-          })
-        },
-        fail: (error) => {
-          console.error('Camera creation failed:', error)
-          throw error
-        }
+      // 启动视频预览
+      this.video.play()
+
+      // 监听视频错误
+      this.video.onError((err) => {
+        console.error('Video error:', err)
       })
+
+      console.log('Video initialized')
     } catch (error) {
-      console.error('Camera initialization failed:', error)
+      console.error('Video initialization failed:', error)
       throw new Error('需要相机权限')
     }
   }
@@ -141,6 +138,13 @@ class Game {
 
       recorderManager.onError((error) => {
         console.error('Recording error:', error)
+        // 录音出错时自动切换到倾斜控制
+        this.data.usingTilt = true
+        wx.showToast({
+          title: '已切换到倾斜控制',
+          icon: 'none',
+          duration: 2000
+        })
       })
 
       recorderManager.onFrameRecorded((res) => {
@@ -155,7 +159,13 @@ class Game {
       console.log('Audio system initialized')
     } catch (error) {
       console.error('Audio initialization failed:', error)
-      throw new Error('需要麦克风权限')
+      // 音频初始化失败时自动切换到倾斜控制
+      this.data.usingTilt = true
+      wx.showToast({
+        title: '已切换到倾斜控制',
+        icon: 'none',
+        duration: 2000
+      })
     }
   }
 
@@ -208,17 +218,52 @@ class Game {
       interval: 'game'
     })
     wx.onAccelerometerChange((res) => {
-      if (this.state === GAME_STATE.PLAYING) {
-        // 可以用加速度计作为备用控制方式
+      if (this.state === GAME_STATE.PLAYING && this.data.usingTilt) {
+        // 使用倾斜控制移动
+        if (Math.abs(res.x) > CONFIG.tiltThreshold) {
+          this.gameObjects.chicken.velocityX = CONFIG.tiltSensitivity * res.x
+          this.gameObjects.chicken.isMoving = true
+        } else {
+          this.gameObjects.chicken.velocityX *= 0.9
+          this.gameObjects.chicken.isMoving = false
+        }
+
+        // 使用向上倾斜跳跃
+        if (res.y < -CONFIG.tiltThreshold && !this.gameObjects.chicken.isJumping) {
+          this.gameObjects.chicken.velocityY = CONFIG.jumpForce
+          this.gameObjects.chicken.isJumping = true
+        }
       }
+    })
+
+    // 监听切换控制方式的按钮
+    wx.onTouchStart((e) => {
+      // 检查是否点击了切换按钮区域
+      const x = e.touches[0].clientX
+      const y = e.touches[0].clientY
+      if (x > gameWidth - 60 && x < gameWidth - 20 && 
+          y > 20 && y < 60) {
+        this.toggleControl()
+      }
+    })
+  }
+
+  toggleControl() {
+    this.data.usingTilt = !this.data.usingTilt
+    wx.showToast({
+      title: this.data.usingTilt ? '已切换到倾斜控制' : '已切换到声音控制',
+      icon: 'none',
+      duration: 2000
     })
   }
 
   startGame() {
     if (this.state !== GAME_STATE.READY) return
 
-    // 开始录音
-    this.systems.recorder.start(this.recorderConfig)
+    // 如果不是使用倾斜控制，则开始录音
+    if (!this.data.usingTilt) {
+      this.systems.recorder.start(this.recorderConfig)
+    }
 
     // 开始游戏循环
     this.startGameLoop()
@@ -286,10 +331,8 @@ class Game {
     // 清空画布
     this.ctx.clearRect(0, 0, gameWidth, gameHeight)
 
-    // 绘制背景（来自相机）
-    if (this.systems.camera) {
-      this.systems.camera.render(this.canvas)
-    }
+    // 绘制视频背景
+    this.ctx.drawImage(this.video, 0, 0, gameWidth, gameHeight)
 
     // 应用相机变换
     this.ctx.save()
@@ -318,22 +361,34 @@ class Game {
   }
 
   renderUI() {
-    // 绘制音量条
-    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
-    this.ctx.fillRect(20, 20, 30, 150)
-    
-    this.ctx.fillStyle = '#4CAF50'
-    const volumeHeight = 150 * this.data.volumeLevel
-    this.ctx.fillRect(20, 170 - volumeHeight, 30, volumeHeight)
+    // 绘制音量条（仅在使用声音控制时显示）
+    if (!this.data.usingTilt) {
+      this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+      this.ctx.fillRect(20, 20, 30, 150)
+      
+      this.ctx.fillStyle = '#4CAF50'
+      const volumeHeight = 150 * this.data.volumeLevel
+      this.ctx.fillRect(20, 170 - volumeHeight, 30, volumeHeight)
+    }
 
     // 绘制游戏数据
     this.ctx.fillStyle = 'white'
     this.ctx.font = '20px Arial'
     this.ctx.fillText(`时间: ${Math.floor(this.data.gameTime)}秒`, 70, 30)
     this.ctx.fillText(`距离: ${Math.floor(this.data.distance)}米`, 70, 60)
+
+    // 绘制控制方式切换按钮
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+    this.ctx.fillRect(gameWidth - 60, 20, 40, 40)
+    this.ctx.fillStyle = 'white'
+    this.ctx.font = '12px Arial'
+    this.ctx.textAlign = 'center'
+    this.ctx.fillText(this.data.usingTilt ? '倾斜' : '声音', gameWidth - 40, 45)
   }
 
   processAudioData(buffer) {
+    if (this.data.usingTilt) return;  // 如果使用倾斜控制则不处理音频
+
     const data = new Float32Array(buffer)
     let sum = 0
     let maxFreq = 0
@@ -437,11 +492,11 @@ class Game {
     if (this.systems.frameTimer) {
       cancelAnimationFrame(this.systems.frameTimer)
     }
-    if (this.systems.recorder) {
+    if (this.systems.recorder && !this.data.usingTilt) {
       this.systems.recorder.stop()
     }
-    if (this.systems.camera) {
-      this.systems.camera.stop()
+    if (this.video) {
+      this.video.stop()
     }
   }
 
@@ -458,6 +513,7 @@ class Game {
     this.ctx.font = '20px Arial'
     this.ctx.fillText('发出声音移动 - 音量控制速度', gameWidth/2, gameHeight/2 + 40)
     this.ctx.fillText('发出高音跳跃 - 音调控制高度', gameWidth/2, gameHeight/2 + 70)
+    this.ctx.fillText('右上角可切换倾斜控制', gameWidth/2, gameHeight/2 + 100)
   }
 
   showResult(title, isWin) {
