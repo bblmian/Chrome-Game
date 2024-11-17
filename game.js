@@ -69,16 +69,38 @@ class Game {
   }
 
   async initCamera() {
-    // 创建相机上下文
-    const camera = wx.createCameraContext()
-    
-    // 检查相机权限
     try {
+      // 检查相机权限
       await wx.authorize({ scope: 'scope.camera' })
-      this.systems.camera = camera
-      console.log('Camera initialized')
+
+      // 创建相机
+      const camera = wx.createCamera({
+        x: 0,
+        y: 0,
+        width: gameWidth,
+        height: gameHeight,
+        devicePosition: 'front',
+        flash: 'off',
+        success: () => {
+          console.log('Camera created successfully')
+          this.systems.camera = camera
+          // 启动相机预览
+          camera.start({
+            success: () => {
+              console.log('Camera preview started')
+            },
+            fail: (error) => {
+              console.error('Camera preview failed:', error)
+            }
+          })
+        },
+        fail: (error) => {
+          console.error('Camera creation failed:', error)
+          throw error
+        }
+      })
     } catch (error) {
-      console.error('Camera authorization failed:', error)
+      console.error('Camera initialization failed:', error)
       throw new Error('需要相机权限')
     }
   }
@@ -254,7 +276,9 @@ class Game {
     this.ctx.clearRect(0, 0, gameWidth, gameHeight)
 
     // 绘制背景（来自相机）
-    this.renderCamera()
+    if (this.systems.camera) {
+      this.systems.camera.render(this.canvas)
+    }
 
     // 应用相机变换
     this.ctx.save()
@@ -280,23 +304,6 @@ class Game {
 
     // 绘制UI
     this.renderUI()
-  }
-
-  renderCamera() {
-    if (this.systems.camera) {
-      const frame = this.systems.camera.takePhoto({
-        quality: 'low',
-        success: (res) => {
-          // 创建图片对象
-          const image = canvas.createImage()
-          image.src = res.tempImagePath
-          image.onload = () => {
-            // 绘制相机画面
-            this.ctx.drawImage(image, 0, 0, gameWidth, gameHeight)
-          }
-        }
-      })
-    }
   }
 
   renderUI() {
@@ -421,6 +428,9 @@ class Game {
     }
     if (this.systems.recorder) {
       this.systems.recorder.stop()
+    }
+    if (this.systems.camera) {
+      this.systems.camera.stop()
     }
   }
 
