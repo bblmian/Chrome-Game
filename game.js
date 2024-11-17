@@ -1,22 +1,8 @@
-// 导入适配器
-const { canvas, document } = require('./js/libs/weapp-adapter')
-require('./js/libs/symbol')
-
+// 获取游戏画布
+const canvas = wx.createCanvas()
 const ctx = canvas.getContext('2d')
 const gameWidth = canvas.width
 const gameHeight = canvas.height
-
-// 创建视频元素
-const video = wx.createVideo({
-  x: 0,
-  y: 0,
-  width: gameWidth,
-  height: gameHeight,
-  objectFit: 'cover',
-  devicePosition: 'front',
-  live: true,
-  muted: true
-})
 
 // 游戏状态
 const GAME_STATE = {
@@ -41,7 +27,6 @@ class Game {
   constructor() {
     this.canvas = canvas
     this.ctx = ctx
-    this.video = video
     this.state = GAME_STATE.READY
     this.gameObjects = {
       chicken: null,
@@ -52,7 +37,8 @@ class Game {
     this.systems = {
       recorder: null,
       frameTimer: null,
-      lastFrameTime: 0
+      lastFrameTime: 0,
+      camera: null
     }
     this.data = {
       gameTime: 0,
@@ -61,15 +47,24 @@ class Game {
       pitchLevel: 0
     }
 
-    // 启动游戏
+    // 监听游戏生命周期
     wx.onShow(() => {
-      this.init()
+      console.log('Game show')
+      this.onShow()
     })
+
+    wx.onHide(() => {
+      console.log('Game hide')
+      this.onHide()
+    })
+
+    // 初始化游戏
+    this.init()
   }
 
   async init() {
     try {
-      await this.initVideo()
+      await this.initCamera()
       await this.initAudio()
       this.initGameObjects()
       this.bindEvents()
@@ -83,22 +78,34 @@ class Game {
     }
   }
 
-  async initVideo() {
+  async initCamera() {
     try {
       // 检查相机权限
       await wx.authorize({ scope: 'scope.camera' })
 
-      // 启动视频预览
-      this.video.play()
-
-      // 监听视频错误
-      this.video.onError((err) => {
-        console.error('Video error:', err)
+      // 创建相机上下文
+      const camera = wx.createCamera({
+        x: 0,
+        y: 0,
+        width: gameWidth,
+        height: gameHeight,
+        devicePosition: 'front',
+        flash: 'off'
       })
 
-      console.log('Video initialized')
+      // 启动相机预览
+      camera.start({
+        success: () => {
+          console.log('Camera started')
+          this.systems.camera = camera
+        },
+        fail: (error) => {
+          console.error('Camera start failed:', error)
+        }
+      })
+
     } catch (error) {
-      console.error('Video initialization failed:', error)
+      console.error('Camera initialization failed:', error)
       throw new Error('需要相机权限')
     }
   }
@@ -191,6 +198,26 @@ class Game {
     })
   }
 
+  onShow() {
+    // 游戏恢复时的处理
+    if (this.state === GAME_STATE.PLAYING) {
+      this.systems.camera?.start()
+      this.systems.recorder?.start(this.recorderConfig)
+      this.startGameLoop()
+    }
+  }
+
+  onHide() {
+    // 游戏暂停时的处理
+    if (this.state === GAME_STATE.PLAYING) {
+      this.systems.camera?.stop()
+      this.systems.recorder?.stop()
+      if (this.systems.frameTimer) {
+        cancelAnimationFrame(this.systems.frameTimer)
+      }
+    }
+  }
+
   startGame() {
     if (this.state !== GAME_STATE.READY) return
 
@@ -263,8 +290,10 @@ class Game {
     // 清空画布
     this.ctx.clearRect(0, 0, gameWidth, gameHeight)
 
-    // 绘制视频背景
-    this.ctx.drawImage(this.video, 0, 0, gameWidth, gameHeight)
+    // 绘制相机画面
+    if (this.systems.camera) {
+      this.systems.camera.render(canvas)
+    }
 
     // 应用相机变换
     this.ctx.save()
@@ -415,8 +444,8 @@ class Game {
     if (this.systems.recorder) {
       this.systems.recorder.stop()
     }
-    if (this.video) {
-      this.video.stop()
+    if (this.systems.camera) {
+      this.systems.camera.stop()
     }
   }
 
