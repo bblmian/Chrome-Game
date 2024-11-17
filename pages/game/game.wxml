@@ -1,0 +1,42 @@
+<view class="container">
+  <view class="game-wrapper">
+    <view class="game-border"></view>
+    <view class="game-container">
+      <camera device-position="front" flash="off" frame-size="medium" class="camera"></camera>
+      <canvas type="2d" id="gameCanvas" class="game-canvas"></canvas>
+      <view class="wave-overlay"></view>
+    </view>
+  </view>
+
+  <view class="stats-container">
+    <view class="stat-item">
+      <text class="stat-label">时间：</text>
+      <text class="stat-value">{{gameTime}}秒</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-label">距离：</text>
+      <text class="stat-value">{{distance}}米</text>
+    </view>
+  </view>
+
+  <view class="volume-indicator">
+    <view class="volume-bar">
+      <view class="volume-level" style="height: {{volumeLevel}}%"></view>
+    </view>
+    <view class="pitch-marker" style="bottom: {{pitchLevel}}%"></view>
+  </view>
+
+  <view class="debug-panel" wx:if="{{showDebug}}">
+    <view class="debug-item">音量：{{volumeLevel}}</view>
+    <view class="debug-item">音高：{{pitchLevel}}</view>
+    <view class="debug-item">FPS：{{fps}}</view>
+  </view>
+
+  <view class="message-overlay" wx:if="{{showMessage}}">
+    <view class="message-box">
+      <view class="message-title">{{messageTitle}}</view>
+      <view class="message-content">{{messageContent}}</view>
+      <button class="message-button" bindtap="handleMessageButton">{{messageButtonText}}</button>
+    </view>
+  </view>
+</view>
