@@ -35,6 +35,77 @@
 
     <div id="debug"></div>
 
+    <!-- WeChat JSSDK -->
+    <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+    <script>
+        // 检测是否在微信浏览器中
+        window.isWechat = /MicroMessenger/i.test(navigator.userAgent);
+        
+        if (window.isWechat) {
+            // 配置微信JSSDK
+            fetch('/api/wechat/config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    url: window.location.href.split('#')[0]
+                })
+            })
+            .then(response => response.json())
+            .then(config => {
+                wx.config({
+                    debug: false,
+                    appId: config.appId,
+                    timestamp: config.timestamp,
+                    nonceStr: config.nonceStr,
+                    signature: config.signature,
+                    jsApiList: [
+                        'startRecord',
+                        'stopRecord',
+                        'onVoiceRecordEnd',
+                        'playVoice',
+                        'pauseVoice',
+                        'stopVoice',
+                        'onVoicePlayEnd',
+                        'uploadVoice',
+                        'downloadVoice',
+                        'chooseImage',
+                        'previewImage',
+                        'uploadImage',
+                        'downloadImage',
+                        'getLocalImgData',
+                        'updateAppMessageShareData',
+                        'updateTimelineShareData'
+                    ]
+                });
+            })
+            .catch(error => {
+                console.error('WeChat config error:', error);
+            });
+
+            // 微信JSSDK准备就绪
+            wx.ready(function() {
+                console.log('WeChat JSSDK ready');
+                // 配置分享信息
+                wx.updateAppMessageShareData({ 
+                    title: '小鸡闯关', 
+                    desc: '来玩好玩的声控小游戏！', 
+                    link: window.location.href, 
+                    imgUrl: window.location.origin + '/assets/banner.png',
+                    success: function () {
+                        console.log('Share config updated');
+                    }
+                });
+            });
+
+            // 微信JSSDK错误处理
+            wx.error(function(res) {
+                console.error('WeChat JSSDK error:', res);
+            });
+        }
+    </script>
+
     <!-- Debug utilities -->
     <script src="js/debug-utils.js"></script>
 
