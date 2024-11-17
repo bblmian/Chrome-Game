@@ -1,154 +1,64 @@
-class Sprite {
-    constructor(x, y, width, height) {
-        if (typeof x !== 'number' || typeof y !== 'number' || 
-            typeof width !== 'number' || typeof height !== 'number') {
-            throw new Error('Sprite constructor requires numeric x, y, width, and height');
-        }
-        
-        // Position and dimensions
-        this.x = Math.round(x);          // Round to prevent subpixel rendering
-        this.y = Math.round(y);
-        this.width = Math.round(width);
-        this.height = Math.round(height);
-        
-        // Physics properties
+class BaseSprite {
+    constructor(options) {
+        this.game = options.game;
+        this.x = options.x || 0;
+        this.y = options.y || 0;
+        this.width = options.width || 40;
+        this.height = options.height || 40;
         this.velocityX = 0;
         this.velocityY = 0;
-        this.acceleration = 0;
-        this.friction = 0.8;
-        this.bounce = 0.2;
-        
-        // State flags
         this.isJumping = false;
-        this.isOnGround = false;
-        this.isActive = true;
-        this.isVisible = true;
-        
-        // Collision bounds (can be different from render bounds)
-        this.collisionOffset = {
-            x: 0,
-            y: 0,
-            width: 0,
-            height: 0
-        };
+        this.jumpForce = -500 * this.game.scale;  // 缩放跳跃力
+        this.moveSpeed = 300 * this.game.scale;   // 缩放移动速度
     }
 
-    update(deltaTime) {
-        if (!this.isActive) return;
+    updateSize(scale) {
+        // 保持相对位置不变
+        this.x = (this.x / this.game.scale) * scale;
+        this.y = (this.y / this.game.scale) * scale;
+        this.width = (this.width / this.game.scale) * scale;
+        this.height = (this.height / this.game.scale) * scale;
+        
+        // 更新物理参数
+        this.jumpForce = -500 * scale;
+        this.moveSpeed = 300 * scale;
+    }
 
-        // Store previous position for collision resolution
-        this.previousX = this.x;
-        this.previousY = this.y;
+    moveLeft() {
+        this.velocityX = -this.moveSpeed;
+    }
 
-        // Update position with velocity
-        this.x += this.velocityX * deltaTime;
-        this.y += this.velocityY * deltaTime;
+    moveRight() {
+        this.velocityX = this.moveSpeed;
+    }
 
-        // Round position to prevent subpixel rendering
-        this.x = Math.round(this.x);
-        this.y = Math.round(this.y);
+    jump() {
+        if (!this.isJumping) {
+            this.velocityY = this.jumpForce;
+            this.isJumping = true;
+        }
+    }
+
+    update() {
+        // 应用摩擦力
+        this.velocityX *= 0.9;
+
+        // 限制最大速度
+        const maxSpeed = this.moveSpeed * 1.5;
+        this.velocityX = Math.max(-maxSpeed, Math.min(maxSpeed, this.velocityX));
+    }
+
+    render(ctx) {
+        ctx.fillStyle = '#FFD700';  // 金色
+        ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 
     getBounds() {
         return {
-            x: this.x,
-            y: this.y,
-            width: this.width,
-            height: this.height
-        };
-    }
-
-    getCollisionBounds() {
-        return {
-            x: this.x + this.collisionOffset.x,
-            y: this.y + this.collisionOffset.y,
-            width: this.width - this.collisionOffset.width,
-            height: this.height - this.collisionOffset.height
-        };
-    }
-
-    getCenter() {
-        return {
-            x: this.x + this.width / 2,
-            y: this.y + this.height / 2
-        };
-    }
-
-    setPosition(x, y) {
-        if (typeof x !== 'number' || typeof y !== 'number') {
-            throw new Error('setPosition requires numeric x and y coordinates');
-        }
-        this.x = Math.round(x);
-        this.y = Math.round(y);
-    }
-
-    setVelocity(vx, vy) {
-        if (typeof vx !== 'number' || typeof vy !== 'number') {
-            throw new Error('setVelocity requires numeric vx and vy values');
-        }
-        this.velocityX = vx;
-        this.velocityY = vy;
-    }
-
-    // Check collision with another sprite
-    collidesWith(other) {
-        if (!this.isActive || !other.isActive) return false;
-
-        const bounds1 = this.getCollisionBounds();
-        const bounds2 = other.getCollisionBounds();
-
-        return !(bounds1.x + bounds1.width < bounds2.x ||
-                bounds1.x > bounds2.x + bounds2.width ||
-                bounds1.y + bounds1.height < bounds2.y ||
-                bounds1.y > bounds2.y + bounds2.height);
-    }
-
-    // Get collision side with another sprite
-    getCollisionSide(other) {
-        const bounds1 = this.getCollisionBounds();
-        const bounds2 = other.getCollisionBounds();
-
-        const dx = (bounds1.x + bounds1.width / 2) - (bounds2.x + bounds2.width / 2);
-        const dy = (bounds1.y + bounds1.height / 2) - (bounds2.y + bounds2.height / 2);
-        const width = (bounds1.width + bounds2.width) / 2;
-        const height = (bounds1.height + bounds2.height) / 2;
-        const crossWidth = width * dy;
-        const crossHeight = height * dx;
-
-        if (Math.abs(dx) <= width && Math.abs(dy) <= height) {
-            if (crossWidth > crossHeight) {
-                return crossWidth > -crossHeight ? 'bottom' : 'left';
-            } else {
-                return crossWidth > -crossHeight ? 'right' : 'top';
-            }
-        }
-        return null;
-    }
-
-    // Reset sprite state
-    reset() {
-        this.velocityX = 0;
-        this.velocityY = 0;
-        this.isJumping = false;
-        this.isOnGround = false;
-        this.isActive = true;
-        this.isVisible = true;
-    }
-
-    // Get sprite state for debugging
-    getState() {
-        return {
-            position: { x: this.x, y: this.y },
-            velocity: { x: this.velocityX, y: this.velocityY },
-            dimensions: { width: this.width, height: this.height },
-            state: {
-                isJumping: this.isJumping,
-                isOnGround: this.isOnGround,
-                isActive: this.isActive,
-                isVisible: this.isVisible
-            }
+            left: this.x,
+            right: this.x + this.width,
+            top: this.y,
+            bottom: this.y + this.height
         };
     }
 }
-
-window.Sprite = Sprite;

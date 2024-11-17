@@ -1,214 +1,185 @@
-class GameManager extends GameManagerBase {
-    constructor(canvas) {
-        super(canvas);
+class GameManager {
+    constructor() {
+        // 创建游戏实例
+        this.game = new Game();
         
-        // Debug logging
-        this.debug = document.getElementById('debug');
+        // 游戏状态
+        this.isRunning = false;
+        this.isPaused = false;
         
-        // Game end handling
-        this.isEnding = false;
+        // 绑定事件处理器
+        this.bindEvents();
         
-        // Download button
-        this.downloadButton = document.getElementById('downloadButton');
-        if (this.downloadButton) {
-            this.downloadButton.onclick = this.handleDownload.bind(this);
-        }
+        // 初始化
+        this.init();
     }
 
-    log(message) {
-        console.log(message);
-        if (this.debug) {
-            const time = new Date().toLocaleTimeString();
-            this.debug.innerHTML = `${time} - ${message}\n` + this.debug.innerHTML;
-        }
-    }
-
-    async start() {
-        try {
-            this.log('开始初始化游戏管理器...');
-
-            // Verify required classes
-            const requiredClasses = [
-                'GameCore', 'GameLoop', 'GameState', 'GameInput',
-                'GameRenderer', 'GameBackground', 'GameUI',
-                'Sprite', 'Platform', 'Flag', 'Chicken',
-                'AudioController', 'AudioProcessor'
-            ];
-            
-            for (const className of requiredClasses) {
-                if (typeof window[className] === 'undefined') {
-                    throw new Error(`Required class ${className} is not defined`);
-                }
-            }
-
-            // Verify audio system is initialized
-            if (!window.audioSystem) {
-                throw new Error('AudioSystem is not initialized');
-            }
-
-            // Cleanup previous instances
-            if (this.gameCore) {
-                this.log('清理旧游戏实例...');
-                await this.gameCore.cleanup();
-            }
-            if (this.gameLoop) {
-                this.log('停止旧游戏循环...');
-                this.gameLoop.stop();
-            }
-
-            // Reset state
-            this.isEnding = false;
-
-            // Create new instances
-            this.log('创建游戏核心...');
-            this.gameCore = new GameCore(this.canvas);
-            
-            this.log('创建游戏循环...');
-            this.gameLoop = new GameLoop(this.gameCore);
-
-            // Initialize game core
-            this.log('初始化游戏核心...');
-            const success = await this.gameCore.initialize();
-            
-            if (!success) {
-                throw new Error('游戏核心初始化失败');
-            }
-
-            // Set initial state to MENU
-            this.gameCore.state.setState('MENU');
-
-            this.log('游戏管理器初始化成功');
-            return true;
-
-        } catch (error) {
-            this.log(`游戏管理器初始化错误: ${error.message}`);
-            console.error(error);
-            return false;
-        }
-    }
-
-    async startGame() {
-        try {
-            this.log('开始启动游戏...');
-            
-            if (!this.gameCore || !this.gameLoop) {
-                throw new Error('游戏组件未初始化');
-            }
-
-            // Reset game components
-            this.log('重置游戏组件...');
-            if (this.gameCore.chicken) {
-                this.gameCore.chicken.reset();
-            }
-            if (this.gameCore.camera) {
-                this.gameCore.camera.reset();
-            }
-            if (this.gameCore.input) {
-                this.gameCore.input.reset();
-            }
-            
-            // Set game state to PLAYING
-            this.log('设置游戏状态为PLAYING...');
-            this.gameCore.state.setState('PLAYING');
-            
-            // Start game loop
-            this.log('启动游戏循环...');
-            this.gameLoop.start();
-
-            // Start recording if available
-            if (this.gameCore.recorder) {
-                this.log('开始录制...');
-                await this.gameCore.recorder.startRecording();
-            }
-
-            // Log initial game state
-            const state = this.gameCore.state.getState();
-            this.log(`游戏状态: ${JSON.stringify(state)}`);
-
-            return true;
-
-        } catch (error) {
-            this.log(`游戏启动错误: ${error.message}`);
-            console.error(error);
-            return false;
-        }
-    }
-
-    handleGameEnd(state) {
-        if (this.isEnding) return;
-        this.isEnding = true;
-
-        try {
-            // Notify recorder of game end
-            if (this.gameCore.recorder) {
-                this.gameCore.recorder.setGameEnd();
-            }
-
-            // Update game state
-            this.gameCore.state.setState(state);
-
-            // Enable download button (as fallback)
-            if (this.downloadButton) {
-                this.downloadButton.disabled = false;
-            }
-
-            // Call global game end handler
-            if (window.onGameEnd) {
-                window.onGameEnd();
-            }
-
-            this.log(`游戏结束 - ${state}`);
-
-        } catch (error) {
-            this.log(`游戏结束处理错误: ${error.message}`);
-            console.error(error);
-        }
-    }
-
-    handleDownload() {
-        try {
-            if (this.gameCore && this.gameCore.recorder) {
-                this.gameCore.recorder.handleVideoExport();
+    init() {
+        // 监听页面可见性变化
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.pause();
             } else {
-                this.log('录像器未找到');
+                this.resume();
             }
-        } catch (error) {
-            this.log(`下载处理错误: ${error.message}`);
-            console.error(error);
+        });
+
+        // 监听移动端事件
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => this.handleResize(), 100);
+        });
+
+        window.addEventListener('resize', () => {
+            this.handleResize();
+        });
+
+        // 处理移动端音频初始化
+        document.addEventListener('touchstart', () => {
+            if (this.game.audioController && !this.game.audioController.isInitialized) {
+                this.game.audioController.init();
+            }
+        }, { once: true });
+
+        // 阻止移动端默认行为
+        document.addEventListener('touchmove', (e) => {
+            if (this.isRunning) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // 处理移动端返回按钮
+        window.addEventListener('popstate', (e) => {
+            if (this.isRunning) {
+                e.preventDefault();
+                this.pause();
+            }
+        });
+    }
+
+    bindEvents() {
+        // 游戏开始事件
+        document.addEventListener('gameStart', () => {
+            this.start();
+        });
+
+        // 游戏结束事件
+        document.addEventListener('gameOver', () => {
+            this.stop();
+        });
+
+        // 游戏重置事件
+        document.addEventListener('gameReset', () => {
+            this.reset();
+        });
+    }
+
+    start() {
+        if (this.isRunning) return;
+
+        this.isRunning = true;
+        this.isPaused = false;
+
+        // 启动游戏系统
+        this.game.start();
+
+        // 启动音频系统
+        if (this.game.audioController) {
+            this.game.audioController.resume();
+        }
+
+        // 分发游戏开始事件
+        const event = new CustomEvent('gameStarted');
+        document.dispatchEvent(event);
+    }
+
+    stop() {
+        if (!this.isRunning) return;
+
+        this.isRunning = false;
+        this.isPaused = false;
+
+        // 停止游戏系统
+        this.game.stop();
+
+        // 停止音频系统
+        if (this.game.audioController) {
+            this.game.audioController.pause();
+        }
+
+        // 分发游戏结束事件
+        const event = new CustomEvent('gameStopped');
+        document.dispatchEvent(event);
+    }
+
+    pause() {
+        if (!this.isRunning || this.isPaused) return;
+
+        this.isPaused = true;
+
+        // 暂停游戏系统
+        this.game.stop();
+
+        // 暂停音频系统
+        if (this.game.audioController) {
+            this.game.audioController.pause();
+        }
+
+        // 分发游戏暂停事件
+        const event = new CustomEvent('gamePaused');
+        document.dispatchEvent(event);
+    }
+
+    resume() {
+        if (!this.isPaused) return;
+
+        this.isPaused = false;
+
+        // 恢复游戏系统
+        this.game.start();
+
+        // 恢复音频系统
+        if (this.game.audioController) {
+            this.game.audioController.resume();
+        }
+
+        // 分发游戏恢复事件
+        const event = new CustomEvent('gameResumed');
+        document.dispatchEvent(event);
+    }
+
+    reset() {
+        // 停止当前游戏
+        this.stop();
+
+        // 重置游戏状态
+        this.game.reset();
+
+        // 分发游戏重置事件
+        const event = new CustomEvent('gameReset');
+        document.dispatchEvent(event);
+    }
+
+    handleResize() {
+        // 处理屏幕旋转或大小变化
+        if (this.game.setupCanvas) {
+            this.game.setupCanvas();
+        }
+
+        // 如果游戏正在运行，重新渲染
+        if (this.isRunning && !this.isPaused) {
+            this.game.render();
         }
     }
 
-    cleanup() {
-        try {
-            this.log('开始清理游戏资源...');
-
-            if (this.gameLoop) {
-                this.log('停止游戏循环...');
-                this.gameLoop.stop();
-                this.gameLoop = null;
-            }
-
-            if (this.gameCore) {
-                this.log('清理游戏核心...');
-                this.gameCore.cleanup();
-                this.gameCore = null;
-            }
-
-            this.isEnding = false;
-            this.log('游戏资源清理完成');
-        } catch (error) {
-            this.log(`清理错误: ${error.message}`);
-            console.error(error);
-        }
-    }
-
-    get recorder() {
-        return this.gameCore?.recorder;
-    }
-
-    get state() {
-        return this.gameCore?.state;
+    // 获取游戏状态
+    getState() {
+        return {
+            isRunning: this.isRunning,
+            isPaused: this.isPaused,
+            score: this.game.chicken ? Math.floor(this.game.chicken.x / 100) : 0
+        };
     }
 }
 
-window.GameManager = GameManager;
+// 创建游戏管理器实例
+window.gameManager = new GameManager();

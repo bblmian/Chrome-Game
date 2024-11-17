@@ -1,147 +1,89 @@
 class GameInput {
-    constructor() {
-        // Use global audio system
-        if (!window.audioSystem) {
-            throw new Error('AudioSystem is required for GameInput');
-        }
-        
-        this.audioSystem = window.audioSystem;
-        this.audioController = this.audioSystem.controller;
-        this.movementController = this.audioController.movementController;
-        this.debug = document.getElementById('debug');
-        
-        // Input smoothing
-        this.volumeSmoothing = 0.2;    // Volume smoothing
-        this.pitchSmoothing = 0.15;    // Pitch smoothing
-        this.lastVolume = 0;
-        this.lastPitch = 0;
-        
-        // Input thresholds
-        this.noiseFloor = 0.05;        // Minimum volume to consider
-        this.volumeThreshold = 0.1;     // Volume threshold for movement
-        this.pitchThreshold = 0.1;      // Pitch threshold for jumps
-        
-        // Input history for noise reduction
-        this.volumeHistory = new Array(3).fill(0);  // Reduced history size for faster response
-        this.pitchHistory = new Array(3).fill(0);
-        this.historyIndex = 0;
-        
-        // Input amplification
-        this.volumeAmplification = 1.5;  // Volume boost
-        this.pitchAmplification = 1.8;   // Pitch boost
-        
-        // Debug flags
-        this.debugInput = false;
+    constructor(game) {
+        this.game = game;
+        this.keys = {};
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.isTouching = false;
+
+        // 键盘事件
+        window.addEventListener('keydown', this.handleKeyDown.bind(this));
+        window.addEventListener('keyup', this.handleKeyUp.bind(this));
+
+        // 触摸事件
+        const canvas = document.getElementById('gameCanvas');
+        canvas.addEventListener('touchstart', this.handleTouchStart.bind(this));
+        canvas.addEventListener('touchmove', this.handleTouchMove.bind(this));
+        canvas.addEventListener('touchend', this.handleTouchEnd.bind(this));
+
+        // 防止移动端浏览器的默认行为（如滚动、缩放）
+        document.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
     }
 
-    log(message) {
-        console.log(message);
-        if (this.debug) {
-            const time = new Date().toLocaleTimeString();
-            this.debug.innerHTML = `${time} - ${message}\n` + this.debug.innerHTML;
+    handleKeyDown(event) {
+        this.keys[event.code] = true;
+        
+        // 处理跳跃
+        if (event.code === 'Space' && !this.game.chicken.isJumping) {
+            this.game.chicken.jump();
         }
+    }
+
+    handleKeyUp(event) {
+        this.keys[event.code] = false;
+    }
+
+    handleTouchStart(event) {
+        event.preventDefault();
+        const touch = event.touches[0];
+        this.touchStartX = touch.clientX;
+        this.touchStartY = touch.clientY;
+        this.isTouching = true;
+
+        // 处理跳跃
+        if (!this.game.chicken.isJumping) {
+            this.game.chicken.jump();
+        }
+    }
+
+    handleTouchMove(event) {
+        event.preventDefault();
+        if (!this.isTouching) return;
+
+        const touch = event.touches[0];
+        const deltaX = touch.clientX - this.touchStartX;
+        
+        // 模拟左右键
+        if (deltaX < -30) {
+            this.keys['ArrowLeft'] = true;
+            this.keys['ArrowRight'] = false;
+        } else if (deltaX > 30) {
+            this.keys['ArrowLeft'] = false;
+            this.keys['ArrowRight'] = true;
+        } else {
+            this.keys['ArrowLeft'] = false;
+            this.keys['ArrowRight'] = false;
+        }
+
+        this.touchStartX = touch.clientX;
+    }
+
+    handleTouchEnd(event) {
+        event.preventDefault();
+        this.isTouching = false;
+        this.keys['ArrowLeft'] = false;
+        this.keys['ArrowRight'] = false;
     }
 
     update() {
-        try {
-            // Get raw input values from audio controller
-            let rawVolume = this.audioController.getVolumeLevel();
-            let rawPitch = this.audioController.getPitchLevel();
-
-            // Apply amplification
-            rawVolume *= this.volumeAmplification;
-            rawPitch *= this.pitchAmplification;
-
-            // Update input history
-            this.volumeHistory[this.historyIndex] = rawVolume;
-            this.pitchHistory[this.historyIndex] = rawPitch;
-            this.historyIndex = (this.historyIndex + 1) % this.volumeHistory.length;
-
-            // Get smoothed values
-            const smoothVolume = this.getSmoothValue(this.volumeHistory);
-            const smoothPitch = this.getSmoothValue(this.pitchHistory);
-
-            // Apply additional smoothing
-            this.lastVolume = this.lastVolume * this.volumeSmoothing + 
-                            smoothVolume * (1 - this.volumeSmoothing);
-            this.lastPitch = this.lastPitch * this.pitchSmoothing + 
-                           smoothPitch * (1 - this.pitchSmoothing);
-
-            // Apply thresholds and noise floor
-            const volume = this.lastVolume > this.volumeThreshold ? 
-                         Math.min(1, Math.max(0, (this.lastVolume - this.noiseFloor) / 
-                                (1 - this.noiseFloor))) : 0;
-            
-            const pitch = this.lastPitch > this.pitchThreshold ? 
-                        Math.min(1, (this.lastPitch - this.pitchThreshold) / 
-                        (1 - this.pitchThreshold)) : 0;
-
-            // Log input values for debugging
-            if (this.debugInput && (volume > 0 || pitch > 0)) {
-                this.log(`输入 - 音量:${volume.toFixed(2)}, ` +
-                        `音高:${pitch.toFixed(2)}`);
-            }
-
-            // Update movement controller with processed input
-            const movement = this.movementController.update(volume, pitch);
-
-            // Log movement state for debugging
-            if (this.debugInput && movement.isJumping) {
-                this.log(`跳跃状态 - 力度:${movement.jumpForce.toFixed(2)}, ` +
-                        `音高:${pitch.toFixed(2)}`);
-            }
-
-            return movement;
-
-        } catch (error) {
-            this.log(`输入处理错误: ${error.message}`);
-            console.error('Input error:', error);
-            
-            // Return safe default values
-            return {
-                speed: 0,
-                jumpForce: 0,
-                isMoving: false,
-                isJumping: false,
-                facingRight: true,
-                volume: 0,
-                pitch: 0
-            };
+        // 处理移动
+        if (this.keys['ArrowLeft']) {
+            this.game.chicken.moveLeft();
         }
-    }
-
-    getSmoothValue(history) {
-        // Remove outliers
-        const sorted = [...history].sort((a, b) => a - b);
-        const filtered = sorted.slice(1, -1);
-        
-        // Calculate average of remaining values
-        return filtered.reduce((sum, val) => sum + val, 0) / filtered.length || 0;
-    }
-
-    reset() {
-        this.lastVolume = 0;
-        this.lastPitch = 0;
-        this.volumeHistory.fill(0);
-        this.pitchHistory.fill(0);
-        this.historyIndex = 0;
-        if (this.movementController) {
-            this.movementController.reset();
+        if (this.keys['ArrowRight']) {
+            this.game.chicken.moveRight();
         }
-    }
-
-    getState() {
-        return {
-            volume: this.lastVolume,
-            pitch: this.lastPitch,
-            movement: this.movementController ? this.movementController.getState() : null
-        };
-    }
-
-    toggleDebug() {
-        this.debugInput = !this.debugInput;
-        this.log(`输入调试: ${this.debugInput ? '开启' : '关闭'}`);
     }
 }
-
-window.GameInput = GameInput;

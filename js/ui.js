@@ -1,241 +1,159 @@
-class GameUI {
-    constructor(canvas) {
-        this.canvas = canvas;
+class UI {
+    constructor(game) {
+        this.game = game;
+        this.ctx = game.ctx;
+        this.canvas = game.canvas;
         
-        // Base dimensions (original design size)
-        this.baseWidth = 800;
-        this.baseHeight = 400;
-        
-        // Volume meter properties
-        this.volumeBarHeight = 150;
-        this.volumeBarWidth = 30;
-        this.volumeBarX = 20;
-        this.volumeBarY = 20;
-        this.volumeLevel = 0;
-        this.volumeBarRadius = 5;
-        this.targetVolumeLevel = 0;
-        
-        // Pitch indicator properties
-        this.pitchLevel = 0;
-        this.targetPitchLevel = 0;
-        this.pitchIndicatorWidth = 5;
-        this.pitchIndicatorColor = '#FFA500';  // Orange for pitch
-        
-        // Stats display properties
-        this.statsX = this.volumeBarX + this.volumeBarWidth + 20;
-        this.statsY = 20;
-        this.statsWidth = 150;
-        this.statsHeight = 50;
-        
-        // Animation properties
-        this.volumeAnimationSpeed = 0.3;  // Faster volume response
-        this.pitchAnimationSpeed = 0.25;  // Smooth pitch indicator
-        
-        // Threshold indicators
-        this.moveThreshold = 0.15;
-        this.jumpThreshold = 0.2;
+        // UI配置
+        this.config = {
+            fontSize: {
+                small: 16,
+                medium: 24,
+                large: 32
+            },
+            colors: {
+                text: '#FFFFFF',
+                shadow: 'rgba(0, 0, 0, 0.5)',
+                overlay: 'rgba(0, 0, 0, 0.7)',
+                success: '#4CAF50',
+                error: '#F44336'
+            },
+            padding: 20
+        };
+
+        // 缓存常用值
+        this.updateDimensions();
     }
 
-    update() {
-        // Smooth animation transitions
-        this.volumeLevel += (this.targetVolumeLevel - this.volumeLevel) * this.volumeAnimationSpeed;
-        this.pitchLevel += (this.targetPitchLevel - this.pitchLevel) * this.pitchAnimationSpeed;
+    updateDimensions() {
+        // 根据屏幕大小调整字体
+        const scale = Math.min(this.canvas.width / 800, this.canvas.height / 600);
+        this.fontSize = {
+            small: Math.round(this.config.fontSize.small * scale),
+            medium: Math.round(this.config.fontSize.medium * scale),
+            large: Math.round(this.config.fontSize.large * scale)
+        };
+        this.padding = Math.round(this.config.padding * scale);
     }
 
-    setVolume(volume) {
-        this.targetVolumeLevel = volume;
+    render() {
+        if (this.game.state === 'playing') {
+            this.renderGameUI();
+        } else if (this.game.state === 'ready') {
+            this.renderStartScreen();
+        } else if (this.game.state === 'gameover') {
+            this.renderGameOver();
+        }
     }
 
-    setPitch(pitch) {
-        this.targetPitchLevel = pitch;
+    renderGameUI() {
+        // 设置文本样式
+        this.ctx.textAlign = 'left';
+        this.ctx.textBaseline = 'top';
+        
+        // 绘制分数
+        this.setTextStyle(this.fontSize.medium, this.config.colors.text);
+        const score = Math.floor(this.game.chicken.x / 100);
+        this.drawText(`得分: ${score}`, this.padding, this.padding);
+
+        // 绘制音量指示器（如果使用音频控制）
+        if (this.game.audioController && this.game.audioController.isInitialized) {
+            this.renderVolumeIndicator();
+        }
     }
 
-    drawVolumeBar(ctx, scale = 1) {
-        const height = this.volumeBarHeight * this.volumeLevel;
-        const radius = this.volumeBarRadius;
+    renderVolumeIndicator() {
+        const width = 30;
+        const height = 150;
+        const x = this.canvas.width - width - this.padding;
+        const y = this.padding;
 
-        // Draw background with border
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.lineWidth = 2;
-        this.roundRect(ctx,
-            this.volumeBarX,
-            this.volumeBarY,
-            this.volumeBarWidth,
-            this.volumeBarHeight,
-            radius
-        );
-        ctx.fill();
-        ctx.stroke();
+        // 绘制背景
+        this.ctx.fillStyle = this.config.colors.shadow;
+        this.ctx.fillRect(x, y, width, height);
 
-        // Draw volume bar
-        if (height > 0) {
-            // Color gradient based on thresholds
-            const gradient = ctx.createLinearGradient(
-                this.volumeBarX,
-                this.volumeBarY + this.volumeBarHeight - height,
-                this.volumeBarX,
-                this.volumeBarY + this.volumeBarHeight
-            );
-            
-            if (this.volumeLevel > this.jumpThreshold) {
-                gradient.addColorStop(0, '#FFA500');  // Orange
-                gradient.addColorStop(1, '#FF8C00');  // Dark Orange
-            } else if (this.volumeLevel > this.moveThreshold) {
-                gradient.addColorStop(0, '#4CAF50');  // Green
-                gradient.addColorStop(1, '#45A049');  // Dark Green
-            } else {
-                gradient.addColorStop(0, '#9E9E9E');  // Gray
-                gradient.addColorStop(1, '#757575');  // Dark Gray
-            }
-            
-            ctx.fillStyle = gradient;
-            this.roundRect(ctx,
-                this.volumeBarX,
-                this.volumeBarY + this.volumeBarHeight - height,
-                this.volumeBarWidth,
-                height,
-                height < radius ? height / 2 : radius
-            );
-            ctx.fill();
+        // 绘制音量条
+        const volume = this.game.audioController.volumeLevel;
+        const volumeHeight = height * volume;
+        this.ctx.fillStyle = this.config.colors.success;
+        this.ctx.fillRect(x, y + height - volumeHeight, width, volumeHeight);
+    }
+
+    renderStartScreen() {
+        // 绘制半透明背景
+        this.ctx.fillStyle = this.config.colors.overlay;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // 绘制标题
+        this.setTextStyle(this.fontSize.large, this.config.colors.text, 'center');
+        this.drawText('小鸡闯关', this.canvas.width / 2, this.canvas.height / 3);
+
+        // 绘制说明文字
+        this.setTextStyle(this.fontSize.medium, this.config.colors.text, 'center');
+        if (this.game.audioController && this.game.audioController.isInitialized) {
+            this.drawText('发出声音移动 - 音量控制速度', 
+                this.canvas.width / 2, 
+                this.canvas.height / 2);
+            this.drawText('发出高音跳跃 - 音调控制高度', 
+                this.canvas.width / 2, 
+                this.canvas.height / 2 + this.fontSize.medium * 1.5);
+        } else {
+            this.drawText('左右滑动移动 - 点击跳跃', 
+                this.canvas.width / 2, 
+                this.canvas.height / 2);
         }
 
-        // Draw pitch indicator
-        if (this.pitchLevel > 0) {
-            const pitchY = this.volumeBarY + this.volumeBarHeight * (1 - this.pitchLevel);
-            ctx.fillStyle = this.pitchIndicatorColor;
-            ctx.fillRect(
-                this.volumeBarX - this.pitchIndicatorWidth,
-                pitchY - 1,
-                this.pitchIndicatorWidth,
-                3
-            );
-        }
-
-        // Draw threshold markers with labels
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.font = `${10}px Arial`;
-        ctx.textAlign = 'right';
-        ctx.lineWidth = 1;
-        
-        // Move threshold
-        const moveY = this.volumeBarY + this.volumeBarHeight * (1 - this.moveThreshold);
-        ctx.beginPath();
-        ctx.moveTo(this.volumeBarX, moveY);
-        ctx.lineTo(this.volumeBarX + this.volumeBarWidth, moveY);
-        ctx.stroke();
-        ctx.fillText('移动', this.volumeBarX - 5, moveY + 4);
-        
-        // Jump threshold
-        const jumpY = this.volumeBarY + this.volumeBarHeight * (1 - this.jumpThreshold);
-        ctx.strokeStyle = 'rgba(255, 165, 0, 0.5)';
-        ctx.fillStyle = 'rgba(255, 165, 0, 0.8)';
-        ctx.beginPath();
-        ctx.moveTo(this.volumeBarX, jumpY);
-        ctx.lineTo(this.volumeBarX + this.volumeBarWidth, jumpY);
-        ctx.stroke();
-        ctx.fillText('跳跃', this.volumeBarX - 5, jumpY + 4);
+        // 绘制开始提示
+        this.setTextStyle(this.fontSize.medium, this.config.colors.success, 'center');
+        this.drawText('点击或触摸屏幕开始游戏', 
+            this.canvas.width / 2, 
+            this.canvas.height * 2/3);
     }
 
-    drawStats(ctx, time, distance) {
-        // Draw stats background
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.lineWidth = 2;
-        this.roundRect(ctx,
-            this.statsX,
-            this.statsY,
-            this.statsWidth,
-            this.statsHeight,
-            5
-        );
-        ctx.fill();
-        ctx.stroke();
+    renderGameOver() {
+        // 绘制半透明背景
+        this.ctx.fillStyle = this.config.colors.overlay;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Draw text with shadow
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-        ctx.shadowBlur = 2;
-        ctx.shadowOffsetX = 1;
-        ctx.shadowOffsetY = 1;
-        
-        ctx.fillStyle = 'white';
-        ctx.font = `${14}px Arial`;
-        ctx.textAlign = 'left';
-        ctx.fillText(
-            `时间: ${Math.floor(time)}秒`,
-            this.statsX + 10,
-            this.statsY + 20
-        );
-        ctx.fillText(
-            `距离: ${Math.floor(distance)}米`,
-            this.statsX + 10,
-            this.statsY + 40
-        );
-        
-        // Reset shadow
-        ctx.shadowColor = 'transparent';
+        // 绘制游戏结束文字
+        this.setTextStyle(this.fontSize.large, this.config.colors.error, 'center');
+        this.drawText('游戏结束', 
+            this.canvas.width / 2, 
+            this.canvas.height / 3);
+
+        // 绘制得分
+        const score = Math.floor(this.game.chicken.x / 100);
+        this.setTextStyle(this.fontSize.medium, this.config.colors.text, 'center');
+        this.drawText(`最终得分: ${score}`, 
+            this.canvas.width / 2, 
+            this.canvas.height / 2);
+
+        // 绘制重新开始提示
+        this.setTextStyle(this.fontSize.medium, this.config.colors.success, 'center');
+        this.drawText('点击或触摸屏幕重新开始', 
+            this.canvas.width / 2, 
+            this.canvas.height * 2/3);
     }
 
-    drawMessage(ctx, text, x, y) {
-        const lines = text.split('\n');
-        
-        // Draw message background
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.lineWidth = 2;
-        
-        const padding = 20;
-        const lineHeight = 30;
-        const width = 300;
-        const height = lines.length * lineHeight + padding * 2;
-        
-        this.roundRect(ctx,
-            x - width/2,
-            y - height/2,
-            width,
-            height,
-            10
-        );
-        ctx.fill();
-        ctx.stroke();
-        
-        // Draw text with shadow
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-        ctx.shadowBlur = 4;
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 2;
-        
-        ctx.fillStyle = 'white';
-        ctx.font = `bold ${16}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        lines.forEach((line, index) => {
-            ctx.fillText(
-                line,
-                x,
-                y - (lines.length - 1) * lineHeight/2 + index * lineHeight
-            );
-        });
-        
-        // Reset shadow
-        ctx.shadowColor = 'transparent';
+    setTextStyle(size, color, align = 'left') {
+        this.ctx.font = `${size}px Arial`;
+        this.ctx.fillStyle = color;
+        this.ctx.textAlign = align;
+        this.ctx.textBaseline = 'middle';
     }
 
-    roundRect(ctx, x, y, width, height, radius) {
-        ctx.beginPath();
-        ctx.moveTo(x + radius, y);
-        ctx.lineTo(x + width - radius, y);
-        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-        ctx.lineTo(x + width, y + height - radius);
-        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-        ctx.lineTo(x + radius, y + height);
-        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-        ctx.lineTo(x, y + radius);
-        ctx.quadraticCurveTo(x, y, x + radius, y);
-        ctx.closePath();
+    drawText(text, x, y) {
+        // 绘制文字阴影
+        this.ctx.fillStyle = this.config.colors.shadow;
+        this.ctx.fillText(text, x + 2, y + 2);
+        
+        // 绘制文字
+        this.ctx.fillStyle = this.config.colors.text;
+        this.ctx.fillText(text, x, y);
+    }
+
+    // 当窗口大小改变时调用
+    handleResize() {
+        this.updateDimensions();
     }
 }
-
-window.GameUI = GameUI;
