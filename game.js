@@ -1,8 +1,30 @@
 // 获取游戏画布
-const canvas = wx.createCanvas()
+const canvas = document.getElementById('gameCanvas')
 const ctx = canvas.getContext('2d')
-const gameWidth = canvas.width
-const gameHeight = canvas.height
+
+// 设置画布大小
+const aspectRatio = 16 / 9
+const maxWidth = window.innerWidth
+const maxHeight = window.innerHeight
+let gameWidth, gameHeight
+
+if (maxWidth / maxHeight > aspectRatio) {
+    gameHeight = maxHeight
+    gameWidth = gameHeight * aspectRatio
+} else {
+    gameWidth = maxWidth
+    gameHeight = gameWidth / aspectRatio
+}
+
+canvas.width = gameWidth
+canvas.height = gameHeight
+
+// 加载图片资源
+const chickenImage = new Image()
+chickenImage.src = 'assets/chicken_2.png'
+
+const bannerImage = new Image()
+bannerImage.src = 'assets/banner.png'
 
 // 游戏状态
 const GAME_STATE = {
@@ -20,7 +42,10 @@ const CONFIG = {
   fps: 60,
   gravity: 980,
   chickenSpeed: 300,
-  jumpForce: -500
+  jumpForce: -500,
+  platformHeight: 40,
+  oceanHeight: 100,  // 海洋高度
+  platformGap: 200   // 平台之间的间距
 }
 
 class Game {
@@ -35,10 +60,11 @@ class Game {
       camera: null
     }
     this.systems = {
-      recorder: null,
+      audioContext: null,
+      mediaRecorder: null,
       frameTimer: null,
       lastFrameTime: 0,
-      camera: null
+      videoStream: null
     }
     this.data = {
       gameTime: 0,
@@ -47,19 +73,44 @@ class Game {
       pitchLevel: 0
     }
 
-    // 监听游戏生命周期
-    wx.onShow(() => {
-      console.log('Game show')
-      this.onShow()
+    // 监听页面可见性变化
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        this.onHide()
+      } else {
+        this.onShow()
+      }
     })
 
-    wx.onHide(() => {
-      console.log('Game hide')
-      this.onHide()
-    })
+    // 监听窗口大小变化
+    window.addEventListener('resize', this.handleResize.bind(this))
 
     // 初始化游戏
     this.init()
+  }
+
+  handleResize() {
+    // 重新计算画布大小
+    const maxWidth = window.innerWidth
+    const maxHeight = window.innerHeight
+
+    if (maxWidth / maxHeight > aspectRatio) {
+      gameHeight = maxHeight
+      gameWidth = gameHeight * aspectRatio
+    } else {
+      gameWidth = maxWidth
+      gameHeight = gameWidth / aspectRatio
+    }
+
+    canvas.width = gameWidth
+    canvas.height = gameHeight
+
+    // 重新渲染
+    if (this.state === GAME_STATE.PLAYING) {
+      this.render()
+    } else {
+      this.showStartUI()
+    }
   }
 
   async init() {
@@ -71,35 +122,40 @@ class Game {
       this.showStartUI()
     } catch (error) {
       console.error('Game initialization failed:', error)
-      wx.showToast({
-        title: '游戏初始化失败',
-        icon: 'none'
-      })
+      this.showPermissionDialog()
+    }
+  }
+
+  showPermissionDialog() {
+    const dialog = document.getElementById('permissionDialog')
+    dialog.style.display = 'block'
+  }
+
+  async requestPermissions() {
+    try {
+      await this.initCamera()
+      await this.initAudio()
+      document.getElementById('permissionDialog').style.display = 'none'
+    } catch (error) {
+      console.error('Permission request failed:', error)
     }
   }
 
   async initCamera() {
     try {
-      // 检查相机权限
-      await wx.authorize({ scope: 'scope.camera' })
-
-      // 创建相机
-      const camera = wx.createCamera({
-        x: 0,
-        y: 0,
-        width: gameWidth,
-        height: gameHeight,
-        devicePosition: 'front',
-        flash: 'off'
+      // 获取摄像头流
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'user',
+          width: { ideal: gameWidth },
+          height: { ideal: gameHeight }
+        }
       })
 
-      // 监听相机错误
-      camera.onError((error) => {
-        console.error('Camera error:', error)
-      })
-
-      // 存储相机实例
-      this.systems.camera = camera
+      // 设置视频预览
+      const video = document.getElementById('cameraPreview')
+      video.srcObject = stream
+      this.systems.videoStream = stream
 
       console.log('Camera initialized')
     } catch (error) {
@@ -110,40 +166,32 @@ class Game {
 
   async initAudio() {
     try {
-      // 检查录音权限
-      await wx.authorize({ scope: 'scope.record' })
+      // 创建音频上下文
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)()
       
-      // 创建录音管理器
-      const recorderManager = wx.getRecorderManager()
+      // 获取麦克风流
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       
-      // 设置录音参数
-      const recorderConfig = {
-        duration: 600000,
-        sampleRate: 44100,
-        numberOfChannels: 1,
-        encodeBitRate: 192000,
-        format: 'pcm',
-        frameSize: 1
-      }
+      // 创建音频分析器
+      const analyser = audioContext.createAnalyser()
+      analyser.fftSize = 2048
+      
+      // 连接音频节点
+      const source = audioContext.createMediaStreamSource(stream)
+      source.connect(analyser)
 
-      // 录音事件处理
-      recorderManager.onStart(() => {
-        console.log('Recording started')
-      })
+      // 创建数据缓冲区
+      const bufferLength = analyser.frequencyBinCount
+      const dataArray = new Uint8Array(bufferLength)
 
-      recorderManager.onError((error) => {
-        console.error('Recording error:', error)
-      })
+      // 存储音频系统
+      this.systems.audioContext = audioContext
+      this.systems.analyser = analyser
+      this.systems.dataArray = dataArray
 
-      recorderManager.onFrameRecorded((res) => {
-        const { frameBuffer } = res
-        if (frameBuffer) {
-          this.processAudioData(frameBuffer)
-        }
-      })
+      // 开始音频分析
+      this.startAudioAnalysis()
 
-      this.systems.recorder = recorderManager
-      this.recorderConfig = recorderConfig
       console.log('Audio system initialized')
     } catch (error) {
       console.error('Audio initialization failed:', error)
@@ -151,11 +199,70 @@ class Game {
     }
   }
 
+  startAudioAnalysis() {
+    const analyseAudio = () => {
+      if (this.state === GAME_STATE.PLAYING) {
+        // 获取音频数据
+        this.systems.analyser.getByteFrequencyData(this.systems.dataArray)
+        
+        // 计算音量和音高
+        let volume = 0
+        let pitch = 0
+        const data = this.systems.dataArray
+        
+        // 计算音量（使用频域数据的平均值）
+        for (let i = 0; i < data.length; i++) {
+          volume += data[i]
+        }
+        volume = volume / data.length / 255  // 归一化到0-1
+
+        // 计算音高（使用最大能量的频率）
+        let maxValue = 0
+        let maxIndex = 0
+        for (let i = 0; i < data.length; i++) {
+          if (data[i] > maxValue) {
+            maxValue = data[i]
+            maxIndex = i
+          }
+        }
+        pitch = maxIndex / data.length  // 归一化到0-1
+
+        // 更新游戏数据
+        this.data.volumeLevel = volume
+        this.data.pitchLevel = pitch
+
+        // 控制游戏
+        const chicken = this.gameObjects.chicken
+
+        // 移动控制
+        if (volume > CONFIG.moveThreshold) {
+          chicken.velocityX = CONFIG.chickenSpeed * volume
+          chicken.isMoving = true
+        } else {
+          chicken.velocityX *= 0.9
+          chicken.isMoving = false
+        }
+
+        // 跳跃控制
+        if (pitch > CONFIG.jumpThreshold && !chicken.isJumping) {
+          chicken.velocityY = CONFIG.jumpForce
+          chicken.isJumping = true
+        }
+      }
+
+      // 继续分析
+      requestAnimationFrame(analyseAudio)
+    }
+
+    // 开始分析
+    analyseAudio()
+  }
+
   initGameObjects() {
     // 初始化小鸡
     this.gameObjects.chicken = {
       x: 100,
-      y: gameHeight - 100,
+      y: gameHeight - CONFIG.platformHeight - 40,  // 40是小鸡高度
       width: 40,
       height: 40,
       velocityX: 0,
@@ -165,15 +272,34 @@ class Game {
     }
 
     // 初始化平台
-    this.gameObjects.platforms = [
-      { x: 0, y: gameHeight - 40, width: gameWidth, height: 40 }
-      // 添加更多平台...
-    ]
+    this.gameObjects.platforms = []
+    
+    // 添加起始平台
+    this.gameObjects.platforms.push({
+      x: 0,
+      y: gameHeight - CONFIG.platformHeight - CONFIG.oceanHeight,
+      width: 300,
+      height: CONFIG.platformHeight
+    })
+
+    // 添加更多平台
+    let lastX = 300
+    for (let i = 0; i < 10; i++) {
+      const platform = {
+        x: lastX + CONFIG.platformGap + Math.random() * 100,
+        y: gameHeight - CONFIG.platformHeight - CONFIG.oceanHeight - Math.random() * 100,
+        width: 100 + Math.random() * 200,
+        height: CONFIG.platformHeight
+      }
+      this.gameObjects.platforms.push(platform)
+      lastX = platform.x + platform.width
+    }
 
     // 初始化终点旗帜
+    const lastPlatform = this.gameObjects.platforms[this.gameObjects.platforms.length - 1]
     this.gameObjects.flag = {
-      x: gameWidth - 100,
-      y: gameHeight - 120,
+      x: lastPlatform.x + lastPlatform.width - 40,
+      y: lastPlatform.y - 80,
       width: 40,
       height: 80
     }
@@ -189,7 +315,14 @@ class Game {
 
   bindEvents() {
     // 触摸事件
-    wx.onTouchStart(() => {
+    canvas.addEventListener('touchstart', () => {
+      if (this.state === GAME_STATE.READY) {
+        this.startGame()
+      }
+    })
+
+    // 鼠标事件（用于桌面端测试）
+    canvas.addEventListener('click', () => {
       if (this.state === GAME_STATE.READY) {
         this.startGame()
       }
@@ -199,8 +332,6 @@ class Game {
   onShow() {
     // 游戏恢复时的处理
     if (this.state === GAME_STATE.PLAYING) {
-      this.systems.camera?.start()
-      this.systems.recorder?.start(this.recorderConfig)
       this.startGameLoop()
     }
   }
@@ -208,8 +339,6 @@ class Game {
   onHide() {
     // 游戏暂停时的处理
     if (this.state === GAME_STATE.PLAYING) {
-      this.systems.camera?.stop()
-      this.systems.recorder?.stop()
       if (this.systems.frameTimer) {
         cancelAnimationFrame(this.systems.frameTimer)
       }
@@ -218,12 +347,6 @@ class Game {
 
   startGame() {
     if (this.state !== GAME_STATE.READY) return
-
-    // 开始录音
-    this.systems.recorder.start(this.recorderConfig)
-
-    // 开始相机预览
-    this.systems.camera.start()
 
     // 开始游戏循环
     this.startGameLoop()
@@ -291,22 +414,40 @@ class Game {
     // 清空画布
     this.ctx.clearRect(0, 0, gameWidth, gameHeight)
 
-    // 绘制相机画面（相机会自动渲染到画布上）
+    // 绘制海洋
+    this.ctx.fillStyle = '#4169E1'  // 深蓝色
+    this.ctx.fillRect(
+      this.gameObjects.camera.x,
+      gameHeight - CONFIG.oceanHeight,
+      gameWidth,
+      CONFIG.oceanHeight
+    )
 
     // 应用相机变换
     this.ctx.save()
     this.ctx.translate(-this.gameObjects.camera.x, -this.gameObjects.camera.y)
 
     // 绘制平台
-    this.ctx.fillStyle = '#333'
     this.gameObjects.platforms.forEach(platform => {
-      this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height)
+      // 绘制平台背景
+      this.ctx.drawImage(
+        bannerImage,
+        platform.x,
+        platform.y,
+        platform.width,
+        platform.height
+      )
     })
 
     // 绘制小鸡
-    this.ctx.fillStyle = '#FFD700'
     const chicken = this.gameObjects.chicken
-    this.ctx.fillRect(chicken.x, chicken.y, chicken.width, chicken.height)
+    this.ctx.drawImage(
+      chickenImage,
+      chicken.x,
+      chicken.y,
+      chicken.width,
+      chicken.height
+    )
 
     // 绘制终点旗帜
     this.ctx.fillStyle = '#FF0000'
@@ -335,52 +476,11 @@ class Game {
     this.ctx.fillText(`距离: ${Math.floor(this.data.distance)}米`, 70, 60)
   }
 
-  processAudioData(buffer) {
-    const data = new Float32Array(buffer)
-    let sum = 0
-    let maxFreq = 0
-
-    // 计算音量
-    for (let i = 0; i < data.length; i++) {
-      sum += Math.abs(data[i])
-    }
-    const volume = sum / data.length
-
-    // 简单的音高检测
-    for (let i = 1; i < data.length; i++) {
-      if (data[i] > data[i-1]) maxFreq++
-    }
-    const pitch = maxFreq / data.length
-
-    // 更新数据
-    this.data.volumeLevel = Math.min(1, volume * 2)
-    this.data.pitchLevel = Math.min(1, pitch * 2)
-
-    // 控制游戏
-    if (this.state === GAME_STATE.PLAYING) {
-      const chicken = this.gameObjects.chicken
-
-      // 移动控制
-      if (volume > CONFIG.moveThreshold) {
-        chicken.velocityX = CONFIG.chickenSpeed * volume
-        chicken.isMoving = true
-      } else {
-        chicken.velocityX *= 0.9
-        chicken.isMoving = false
-      }
-
-      // 跳跃控制
-      if (pitch > CONFIG.jumpThreshold && !chicken.isJumping) {
-        chicken.velocityY = CONFIG.jumpForce
-        chicken.isJumping = true
-      }
-    }
-  }
-
   checkCollisions() {
     const chicken = this.gameObjects.chicken
 
     // 检查与平台的碰撞
+    let onPlatform = false
     this.gameObjects.platforms.forEach(platform => {
       if (this.checkCollision(chicken, platform)) {
         // 从上方碰撞
@@ -389,15 +489,18 @@ class Game {
           chicken.y = platform.y - chicken.height
           chicken.velocityY = 0
           chicken.isJumping = false
+          onPlatform = true
         }
       }
     })
 
+    // 如果不在任何平台上且不在跳跃中
+    if (!onPlatform && !chicken.isJumping) {
+      chicken.isJumping = true
+    }
+
     // 防止超出边界
     if (chicken.x < 0) chicken.x = 0
-    if (chicken.x + chicken.width > gameWidth) {
-      chicken.x = gameWidth - chicken.width
-    }
   }
 
   checkCollision(obj1, obj2) {
@@ -420,7 +523,7 @@ class Game {
   }
 
   checkLoseCondition() {
-    return this.gameObjects.chicken.y > gameHeight + 100
+    return this.gameObjects.chicken.y > gameHeight - CONFIG.oceanHeight
   }
 
   gameWin() {
@@ -438,12 +541,6 @@ class Game {
   stopGame() {
     if (this.systems.frameTimer) {
       cancelAnimationFrame(this.systems.frameTimer)
-    }
-    if (this.systems.recorder) {
-      this.systems.recorder.stop()
-    }
-    if (this.systems.camera) {
-      this.systems.camera.stop()
     }
   }
 
@@ -481,14 +578,24 @@ class Game {
     )
 
     this.ctx.fillText('点击屏幕重新开始', gameWidth/2, gameHeight/2 + 40)
-
-    // 分享按钮
-    wx.showShareMenu({
-      withShareTicket: true,
-      menus: ['shareAppMessage', 'shareTimeline']
-    })
   }
 }
 
-// 启动游戏
-new Game()
+// 等待页面加载完成
+window.addEventListener('load', () => {
+  // 等待图片加载
+  Promise.all([
+    new Promise(resolve => chickenImage.onload = resolve),
+    new Promise(resolve => bannerImage.onload = resolve)
+  ]).then(() => {
+    // 启动游戏
+    window.game = new Game()
+  })
+})
+
+// 导出requestPermissions函数供HTML使用
+window.requestPermissions = async () => {
+  if (window.game) {
+    await window.game.requestPermissions()
+  }
+}
