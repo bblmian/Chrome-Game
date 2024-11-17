@@ -4,9 +4,6 @@ const ctx = canvas.getContext('2d')
 const gameWidth = canvas.width
 const gameHeight = canvas.height
 
-// 创建相机组件
-const camera = wx.createCameraContext()
-
 // 游戏状态
 const GAME_STATE = {
   READY: 'ready',
@@ -41,8 +38,7 @@ class Game {
       recorder: null,
       frameTimer: null,
       lastFrameTime: 0,
-      camera: camera,
-      cameraFrame: null
+      camera: null
     }
     this.data = {
       gameTime: 0,
@@ -87,46 +83,29 @@ class Game {
       // 检查相机权限
       await wx.authorize({ scope: 'scope.camera' })
 
-      // 开始预览
-      this.startCameraPreview()
+      // 创建相机
+      const camera = wx.createCamera({
+        x: 0,
+        y: 0,
+        width: gameWidth,
+        height: gameHeight,
+        devicePosition: 'front',
+        flash: 'off'
+      })
+
+      // 监听相机错误
+      camera.onError((error) => {
+        console.error('Camera error:', error)
+      })
+
+      // 存储相机实例
+      this.systems.camera = camera
 
       console.log('Camera initialized')
     } catch (error) {
       console.error('Camera initialization failed:', error)
       throw new Error('需要相机权限')
     }
-  }
-
-  startCameraPreview() {
-    // 每帧获取相机画面
-    const takePhoto = () => {
-      if (this.state === GAME_STATE.PLAYING) {
-        this.systems.camera.takePhoto({
-          quality: 'low',
-          success: (res) => {
-            // 创建图片对象
-            const image = wx.createImage()
-            image.src = res.tempImagePath
-            image.onload = () => {
-              this.systems.cameraFrame = image
-            }
-          },
-          fail: (error) => {
-            console.error('Take photo failed:', error)
-          },
-          complete: () => {
-            // 继续获取下一帧
-            requestAnimationFrame(takePhoto)
-          }
-        })
-      } else {
-        // 如果游戏不在运行状态，延迟检查
-        setTimeout(() => requestAnimationFrame(takePhoto), 1000)
-      }
-    }
-
-    // 开始获取相机画面
-    takePhoto()
   }
 
   async initAudio() {
@@ -220,7 +199,7 @@ class Game {
   onShow() {
     // 游戏恢复时的处理
     if (this.state === GAME_STATE.PLAYING) {
-      this.startCameraPreview()
+      this.systems.camera?.start()
       this.systems.recorder?.start(this.recorderConfig)
       this.startGameLoop()
     }
@@ -229,9 +208,8 @@ class Game {
   onHide() {
     // 游戏暂停时的处理
     if (this.state === GAME_STATE.PLAYING) {
-      if (this.systems.recorder) {
-        this.systems.recorder.stop()
-      }
+      this.systems.camera?.stop()
+      this.systems.recorder?.stop()
       if (this.systems.frameTimer) {
         cancelAnimationFrame(this.systems.frameTimer)
       }
@@ -243,6 +221,9 @@ class Game {
 
     // 开始录音
     this.systems.recorder.start(this.recorderConfig)
+
+    // 开始相机预览
+    this.systems.camera.start()
 
     // 开始游戏循环
     this.startGameLoop()
@@ -310,10 +291,7 @@ class Game {
     // 清空画布
     this.ctx.clearRect(0, 0, gameWidth, gameHeight)
 
-    // 绘制相机画面
-    if (this.systems.cameraFrame) {
-      this.ctx.drawImage(this.systems.cameraFrame, 0, 0, gameWidth, gameHeight)
-    }
+    // 绘制相机画面（相机会自动渲染到画布上）
 
     // 应用相机变换
     this.ctx.save()
@@ -463,6 +441,9 @@ class Game {
     }
     if (this.systems.recorder) {
       this.systems.recorder.stop()
+    }
+    if (this.systems.camera) {
+      this.systems.camera.stop()
     }
   }
 
