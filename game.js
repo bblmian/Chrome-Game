@@ -1,14 +1,7 @@
 // 首先导入适配器
-import window from './js/libs/weapp-adapter'
+import { canvas, document } from './js/libs/weapp-adapter'
 import './js/libs/symbol'
 
-// 确保GameGlobal和window都存在
-const global = GameGlobal
-global.window = window
-window.global = global
-
-// 创建画布
-const canvas = wx.createCanvas()
 const ctx = canvas.getContext('2d')
 const gameWidth = canvas.width
 const gameHeight = canvas.height
