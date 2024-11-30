@@ -24,8 +24,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private var scoreLabel: SKLabelNode?
     private var uiContainer: SKNode?
     
-    // Constraints
-    private var constraints: [SKConstraint] = []
+    // Scene setup
+    private var sceneConstraints: [SKConstraint] = []
     
     override func didMove(to view: SKView) {
         setupPhysicsWorld()
@@ -105,9 +105,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             addChild(uiContainer)
             
             // Add constraint to keep UI fixed to camera
-            let constraint = SKConstraint.distance(SKRange(constantValue: 0),
-                                                 to: camera ?? self)
-            uiContainer.constraints = [constraint]
+            let uiConstraint = SKConstraint.distance(SKRange(constantValue: 0),
+                                                   to: camera ?? self)
+            uiContainer.constraints = [uiConstraint]
         }
         
         // Create chicken with position constraints
@@ -121,8 +121,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             // Add constraint to keep chicken within scene bounds
             let xRange = SKRange(lowerLimit: 0, upperLimit: frame.width)
             let yRange = SKRange(lowerLimit: 0, upperLimit: frame.height)
-            let constraint = SKConstraint.positionX(xRange, y: yRange)
-            chicken.constraints = [constraint]
+            let chickenConstraint = SKConstraint.positionX(xRange, y: yRange)
+            chicken.constraints = [chickenConstraint]
             
             addChild(chicken)
         }
