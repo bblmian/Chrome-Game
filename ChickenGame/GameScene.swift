@@ -10,7 +10,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // Game objects
     private var chicken: ChickenSprite?
     private var platforms: [SKShapeNode] = []
-    private var flag: SKSpriteNode?
+    private var flag: SKNode?  // Changed from SKSpriteNode to SKNode
     private var backgroundLayers: [SKNode] = []
     
     // Game state
