@@ -2,10 +2,9 @@ import SpriteKit
 import AVFoundation
 
 class VideoBackground: SKNode {
-    private var videoNode: SKVideoNode?
+    private var videoNode: SKSpriteNode?
     private var captureSession: AVCaptureSession?
     private var videoOutput: AVCaptureVideoDataOutput?
-    private var previewLayer: AVCaptureVideoPreviewLayer?
     
     // Video dimensions
     private var videoWidth: CGFloat = 0
@@ -62,10 +61,9 @@ class VideoBackground: SKNode {
                     connection.isVideoMirrored = true
                     
                     // Store dimensions
-                    if let dimensions = CMVideoFormatDescriptionGetDimensions(frontCamera.activeFormat.formatDescription) {
-                        videoWidth = CGFloat(dimensions.width)
-                        videoHeight = CGFloat(dimensions.height)
-                    }
+                    let dimensions = frontCamera.activeFormat.formatDescription.dimensions
+                    videoWidth = CGFloat(dimensions.width)
+                    videoHeight = CGFloat(dimensions.height)
                 }
             }
             
@@ -105,11 +103,13 @@ class VideoBackground: SKNode {
         // Update or create video node
         if let videoNode = videoNode {
             videoNode.texture = texture
+            videoNode.size = CGSize(width: drawWidth, height: drawHeight)
         } else {
-            videoNode = SKVideoNode(texture: texture)
-            videoNode?.size = CGSize(width: drawWidth, height: drawHeight)
-            videoNode?.position = CGPoint(x: scene.size.width/2, y: scene.size.height/2)
-            addChild(videoNode!)
+            let node = SKSpriteNode(texture: texture)
+            node.size = CGSize(width: drawWidth, height: drawHeight)
+            node.position = CGPoint(x: scene.size.width/2, y: scene.size.height/2)
+            videoNode = node
+            addChild(node)
         }
         
         // Add gradient overlay
@@ -191,7 +191,9 @@ extension VideoBackground: AVCaptureVideoDataOutputSampleBufferDelegate {
         guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else { return }
         
         DispatchQueue.main.async { [weak self] in
-            self?.videoNode?.texture = SKTexture(cgImage: cgImage)
+            guard let self = self else { return }
+            let texture = SKTexture(cgImage: cgImage)
+            self.videoNode?.texture = texture
         }
     }
 }
