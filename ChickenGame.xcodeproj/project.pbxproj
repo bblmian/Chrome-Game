@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,6 +14,9 @@
 		8A1B3C4D5E6F7G8P /* ChickenSprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B3C4D5E6F7G8Q /* ChickenSprite.swift */; };
 		8A1B3C4D5E6F7G8R /* MovementController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B3C4D5E6F7G8S /* MovementController.swift */; };
 		8A1B3C4D5E6F7G8T /* Celebration.sks in Resources */ = {isa = PBXBuildFile; fileRef = 8A1B3C4D5E6F7G8U /* Celebration.sks */; };
+		8A1B3C4D5E6F7G8V /* VideoBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B3C4D5E6F7G8W /* VideoBackground.swift */; };
+		8A1B3C4D5E6F7G8X /* Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B3C4D5E6F7G8Y /* Platform.swift */; };
+		8A1B3C4D5E6F7G8Z /* Level.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B3C4D5E6F7G90 /* Level.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,11 +28,14 @@
 		8A1B3C4D5E6F7G8Q /* ChickenSprite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChickenSprite.swift; sourceTree = "<group>"; };
 		8A1B3C4D5E6F7G8S /* MovementController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementController.swift; sourceTree = "<group>"; };
 		8A1B3C4D5E6F7G8U /* Celebration.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Celebration.sks; sourceTree = "<group>"; };
-		8A1B3C4D5E6F7G8V /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8A1B3C4D5E6F7G8W /* VideoBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoBackground.swift; sourceTree = "<group>"; };
+		8A1B3C4D5E6F7G8Y /* Platform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform.swift; sourceTree = "<group>"; };
+		8A1B3C4D5E6F7G90 /* Level.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Level.swift; sourceTree = "<group>"; };
+		8A1B3C4D5E6F7G91 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		8A1B3C4D5E6F7G8W /* Frameworks */ = {
+		8A1B3C4D5E6F7G92 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -39,7 +45,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		8A1B3C4D5E6F7G8X /* Products */ = {
+		8A1B3C4D5E6F7G93 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				8A1B3C4D5E6F7G8A /* ChickenGame.app */,
@@ -47,7 +53,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		8A1B3C4D5E6F7G8Y /* ChickenGame */ = {
+		8A1B3C4D5E6F7G94 /* ChickenGame */ = {
 			isa = PBXGroup;
 			children = (
 				8A1B3C4D5E6F7G8I /* ChickenGameApp.swift */,
@@ -56,17 +62,20 @@
 				8A1B3C4D5E6F7G8O /* AudioController.swift */,
 				8A1B3C4D5E6F7G8Q /* ChickenSprite.swift */,
 				8A1B3C4D5E6F7G8S /* MovementController.swift */,
+				8A1B3C4D5E6F7G8W /* VideoBackground.swift */,
+				8A1B3C4D5E6F7G8Y /* Platform.swift */,
+				8A1B3C4D5E6F7G90 /* Level.swift */,
 				8A1B3C4D5E6F7G8U /* Celebration.sks */,
-				8A1B3C4D5E6F7G8V /* Info.plist */,
+				8A1B3C4D5E6F7G91 /* Info.plist */,
 			);
 			path = ChickenGame;
 			sourceTree = "<group>";
 		};
-		8A1B3C4D5E6F7G8Z /* Project */ = {
+		8A1B3C4D5E6F7G95 /* Project */ = {
 			isa = PBXGroup;
 			children = (
-				8A1B3C4D5E6F7G8X /* Products */,
-				8A1B3C4D5E6F7G8Y /* ChickenGame */,
+				8A1B3C4D5E6F7G93 /* Products */,
+				8A1B3C4D5E6F7G94 /* ChickenGame */,
 			);
 			name = Project;
 			sourceTree = "<group>";
@@ -74,13 +83,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8A1B3C4D5E6F7G90 /* ChickenGame */ = {
+		8A1B3C4D5E6F7G96 /* ChickenGame */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8A1B3C4D5E6F7G91 /* Build configuration list for PBXNativeTarget "ChickenGame" */;
+			buildConfigurationList = 8A1B3C4D5E6F7G97 /* Build configuration list for PBXNativeTarget "ChickenGame" */;
 			buildPhases = (
-				8A1B3C4D5E6F7G92 /* Sources */,
-				8A1B3C4D5E6F7G8W /* Frameworks */,
-				8A1B3C4D5E6F7G93 /* Resources */,
+				8A1B3C4D5E6F7G98 /* Sources */,
+				8A1B3C4D5E6F7G92 /* Frameworks */,
+				8A1B3C4D5E6F7G99 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -94,19 +103,19 @@
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		8A1B3C4D5E6F7G94 /* Project object */ = {
+		8A1B3C4D5E6F7G9A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1610;
 				LastUpgradeCheck = 1610;
 				TargetAttributes = {
-					8A1B3C4D5E6F7G90 = {
+					8A1B3C4D5E6F7G96 = {
 						CreatedOnToolsVersion = 16.1;
 					};
 				};
 			};
-			buildConfigurationList = 8A1B3C4D5E6F7G95 /* Build configuration list for PBXProject "ChickenGame" */;
+			buildConfigurationList = 8A1B3C4D5E6F7G9B /* Build configuration list for PBXProject "ChickenGame" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -114,18 +123,18 @@
 				en,
 				Base,
 			);
-			mainGroup = 8A1B3C4D5E6F7G8Z /* Project */;
-			productRefGroup = 8A1B3C4D5E6F7G8X /* Products */;
+			mainGroup = 8A1B3C4D5E6F7G95 /* Project */;
+			productRefGroup = 8A1B3C4D5E6F7G93 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8A1B3C4D5E6F7G90 /* ChickenGame */,
+				8A1B3C4D5E6F7G96 /* ChickenGame */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		8A1B3C4D5E6F7G93 /* Resources */ = {
+		8A1B3C4D5E6F7G99 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -136,7 +145,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		8A1B3C4D5E6F7G92 /* Sources */ = {
+		8A1B3C4D5E6F7G98 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -146,13 +155,16 @@
 				8A1B3C4D5E6F7G8N /* AudioController.swift in Sources */,
 				8A1B3C4D5E6F7G8P /* ChickenSprite.swift in Sources */,
 				8A1B3C4D5E6F7G8R /* MovementController.swift in Sources */,
+				8A1B3C4D5E6F7G8V /* VideoBackground.swift in Sources */,
+				8A1B3C4D5E6F7G8X /* Platform.swift in Sources */,
+				8A1B3C4D5E6F7G8Z /* Level.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		8A1B3C4D5E6F7G96 /* Debug */ = {
+		8A1B3C4D5E6F7G9C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -212,7 +224,7 @@
 			};
 			name = Debug;
 		};
-		8A1B3C4D5E6F7G97 /* Release */ = {
+		8A1B3C4D5E6F7G9D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -266,7 +278,7 @@
 			};
 			name = Release;
 		};
-		8A1B3C4D5E6F7G98 /* Debug */ = {
+		8A1B3C4D5E6F7G9E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -274,12 +286,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"ChickenGame/Preview Content\"";
-				DEVELOPMENT_TEAM = C7T4XN4NUZ;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ChickenGame/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = ChickenRun;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.action-games";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要使用麦克风来控制游戏";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -296,15 +306,14 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		8A1B3C4D5E6F7G99 /* Release */ = {
+		8A1B3C4D5E6F7G9F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -312,12 +321,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"ChickenGame/Preview Content\"";
-				DEVELOPMENT_TEAM = C7T4XN4NUZ;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ChickenGame/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = ChickenRun;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.action-games";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要使用麦克风来控制游戏";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -334,8 +341,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -345,25 +351,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		8A1B3C4D5E6F7G91 /* Build configuration list for PBXNativeTarget "ChickenGame" */ = {
+		8A1B3C4D5E6F7G97 /* Build configuration list for PBXNativeTarget "ChickenGame" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				8A1B3C4D5E6F7G98 /* Debug */,
-				8A1B3C4D5E6F7G99 /* Release */,
+				8A1B3C4D5E6F7G9E /* Debug */,
+				8A1B3C4D5E6F7G9F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8A1B3C4D5E6F7G95 /* Build configuration list for PBXProject "ChickenGame" */ = {
+		8A1B3C4D5E6F7G9B /* Build configuration list for PBXProject "ChickenGame" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				8A1B3C4D5E6F7G96 /* Debug */,
-				8A1B3C4D5E6F7G97 /* Release */,
+				8A1B3C4D5E6F7G9C /* Debug */,
+				8A1B3C4D5E6F7G9D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 8A1B3C4D5E6F7G94 /* Project object */;
+	rootObject = 8A1B3C4D5E6F7G9A /* Project object */;
 }

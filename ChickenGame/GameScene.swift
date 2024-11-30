@@ -1,6 +1,7 @@
 import SpriteKit
 import GameplayKit
 import AVFoundation
+import UIKit
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     // Physics categories
