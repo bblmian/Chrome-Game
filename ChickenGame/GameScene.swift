@@ -9,9 +9,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     // Game objects
     private var chicken: ChickenSprite?
-    private var platforms: [SKShapeNode] = []
-    private var flag: SKNode?  // Changed from SKSpriteNode to SKNode
-    private var backgroundLayers: [SKNode] = []
+    private var level: Level?
+    private var videoBackground: VideoBackground?
     
     // Game state
     private var isGameOver = false
@@ -24,12 +23,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private var scoreLabel: SKLabelNode?
     private var uiContainer: SKNode?
     
-    // Scene setup
-    private var sceneConstraints: [SKConstraint] = []
-    
     override func didMove(to view: SKView) {
         setupPhysicsWorld()
-        setupBackground()
+        setupVideoBackground()
         setupGame()
     }
     
@@ -37,69 +33,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.gravity = CGVector(dx: 0, dy: -9.8)
         physicsWorld.contactDelegate = self
         
-        // Add world bounds with gradient background
+        // Add world bounds
         let borderBody = SKPhysicsBody(edgeLoopFrom: frame)
         borderBody.friction = 0
         borderBody.restitution = 0
         self.physicsBody = borderBody
     }
     
-    private func setupBackground() {
-        // Create parallax background layers
-        let colors: [(CGColor, CGColor)] = [
-            (UIColor(red: 0.4, green: 0.6, blue: 1.0, alpha: 1.0).cgColor,
-             UIColor(red: 0.6, green: 0.8, blue: 1.0, alpha: 1.0).cgColor),
-            (UIColor(red: 0.7, green: 0.9, blue: 1.0, alpha: 0.5).cgColor,
-             UIColor(red: 0.8, green: 0.95, blue: 1.0, alpha: 0.5).cgColor)
-        ]
-        
-        for (index, gradientColors) in colors.enumerated() {
-            let layer = SKNode()
-            let gradientNode = SKShapeNode(rect: CGRect(x: -frame.width/2,
-                                                       y: -frame.height/2,
-                                                       width: frame.width * 2,
-                                                       height: frame.height))
-            
-            let gradient = CAGradientLayer()
-            gradient.colors = [gradientColors.0, gradientColors.1]
-            gradient.startPoint = CGPoint(x: 0.5, y: 0)
-            gradient.endPoint = CGPoint(x: 0.5, y: 1)
-            
-            let image = UIGraphicsImageRenderer(bounds: gradientNode.frame).image { context in
-                gradient.frame = gradientNode.frame
-                gradient.render(in: context.cgContext)
-            }
-            
-            gradientNode.fillTexture = SKTexture(image: image)
-            gradientNode.fillColor = .white
-            gradientNode.strokeColor = .clear
-            gradientNode.zPosition = CGFloat(-100 + index)
-            
-            layer.addChild(gradientNode)
-            addChild(layer)
-            backgroundLayers.append(layer)
-        }
-        
-        // Add decorative clouds
-        for _ in 0..<10 {
-            let cloud = SKShapeNode(circleOfRadius: CGFloat.random(in: 30...50))
-            cloud.fillColor = .white.withAlphaComponent(0.3)
-            cloud.strokeColor = .clear
-            cloud.position = CGPoint(x: CGFloat.random(in: 0...frame.width),
-                                   y: CGFloat.random(in: frame.height/2...frame.height))
-            cloud.zPosition = -90
-            addChild(cloud)
-            
-            // Add floating animation
-            let moveUp = SKAction.moveBy(x: 0, y: 10, duration: TimeInterval.random(in: 1.5...3.0))
-            let moveDown = moveUp.reversed()
-            let sequence = SKAction.sequence([moveUp, moveDown])
-            cloud.run(SKAction.repeatForever(sequence))
+    private func setupVideoBackground() {
+        videoBackground = VideoBackground()
+        if let videoBackground = videoBackground {
+            videoBackground.zPosition = -100
+            addChild(videoBackground)
         }
     }
     
     private func setupGame() {
-        // Create UI container with constraints
+        // Create UI container
         uiContainer = SKNode()
         if let uiContainer = uiContainer {
             addChild(uiContainer)
@@ -110,145 +60,39 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             uiContainer.constraints = [uiConstraint]
         }
         
-        // Create chicken with position constraints
-        chicken = ChickenSprite()
-        if let chicken = chicken {
-            chicken.position = CGPoint(x: frame.width * 0.2, y: frame.height * 0.5)
-            chicken.physicsBody?.categoryBitMask = chickenCategory
-            chicken.physicsBody?.collisionBitMask = platformCategory
-            chicken.physicsBody?.contactTestBitMask = platformCategory | flagCategory
-            
-            // Add constraint to keep chicken within scene bounds
-            let xRange = SKRange(lowerLimit: 0, upperLimit: frame.width)
-            let yRange = SKRange(lowerLimit: 0, upperLimit: frame.height)
-            let chickenConstraint = SKConstraint.positionX(xRange, y: yRange)
-            chicken.constraints = [chickenConstraint]
-            
-            addChild(chicken)
-        }
+        // Create level
+        level = Level(width: 5000, height: frame.height)
         
-        createPlatforms()
-        createFlag()
-        setupUI()
-    }
-    
-    private func createPlatforms() {
-        // Create stylized ground
-        let groundHeight: CGFloat = 50
-        let ground = SKShapeNode(rect: CGRect(x: 0,
-                                            y: 0,
-                                            width: frame.width,
-                                            height: groundHeight),
-                               cornerRadius: 10)
-        
-        let gradient = CAGradientLayer()
-        gradient.colors = [UIColor(red: 0.2, green: 0.8, blue: 0.2, alpha: 1.0).cgColor,
-                         UIColor(red: 0.1, green: 0.6, blue: 0.1, alpha: 1.0).cgColor]
-        gradient.startPoint = CGPoint(x: 0.5, y: 1)
-        gradient.endPoint = CGPoint(x: 0.5, y: 0)
-        
-        let image = UIGraphicsImageRenderer(bounds: ground.frame).image { context in
-            gradient.frame = ground.frame
-            gradient.render(in: context.cgContext)
-        }
-        
-        ground.fillTexture = SKTexture(image: image)
-        ground.fillColor = .white
-        ground.strokeColor = UIColor(red: 0.1, green: 0.6, blue: 0.1, alpha: 1.0)
-        ground.lineWidth = 2
-        ground.position = CGPoint(x: 0, y: 25)
-        ground.physicsBody = SKPhysicsBody(rectangleOf: ground.frame.size)
-        ground.physicsBody?.isDynamic = false
-        ground.physicsBody?.friction = 0.2
-        ground.physicsBody?.categoryBitMask = platformCategory
-        platforms.append(ground)
-        addChild(ground)
-        
-        // Create floating platforms with gradients and shadows
-        let platformPositions = [
-            CGPoint(x: frame.width * 0.4, y: frame.height * 0.3),
-            CGPoint(x: frame.width * 0.6, y: frame.height * 0.5),
-            CGPoint(x: frame.width * 0.8, y: frame.height * 0.4)
-        ]
-        
-        for position in platformPositions {
-            let platform = SKShapeNode(rect: CGRect(x: -60, y: -10,
-                                                  width: 120, height: 20),
-                                     cornerRadius: 5)
-            
-            let platformGradient = CAGradientLayer()
-            platformGradient.colors = [UIColor(red: 0.3, green: 0.9, blue: 0.3, alpha: 1.0).cgColor,
-                                     UIColor(red: 0.2, green: 0.7, blue: 0.2, alpha: 1.0).cgColor]
-            platformGradient.startPoint = CGPoint(x: 0.5, y: 1)
-            platformGradient.endPoint = CGPoint(x: 0.5, y: 0)
-            
-            let platformImage = UIGraphicsImageRenderer(bounds: platform.frame).image { context in
-                platformGradient.frame = platform.frame
-                platformGradient.render(in: context.cgContext)
+        // Add platforms to scene
+        if let level = level {
+            for platform in level.platforms {
+                addChild(platform.createNode())
             }
             
-            platform.fillTexture = SKTexture(image: platformImage)
-            platform.fillColor = .white
-            platform.strokeColor = UIColor(red: 0.2, green: 0.7, blue: 0.2, alpha: 1.0)
-            platform.lineWidth = 2
-            platform.position = position
-            platform.physicsBody = SKPhysicsBody(rectangleOf: platform.frame.size)
-            platform.physicsBody?.isDynamic = false
-            platform.physicsBody?.friction = 0.2
-            platform.physicsBody?.categoryBitMask = platformCategory
+            // Add flag
+            if let flag = level.flag {
+                addChild(flag)
+            }
             
-            // Add platform shadow
-            let shadow = SKShapeNode(rect: platform.frame, cornerRadius: 5)
-            shadow.fillColor = .black
-            shadow.strokeColor = .clear
-            shadow.alpha = 0.2
-            shadow.position = CGPoint(x: 5, y: -5)
-            shadow.zPosition = -1
-            platform.addChild(shadow)
-            
-            // Add floating animation
-            let moveUp = SKAction.moveBy(x: 0, y: 5, duration: 1.5)
-            let moveDown = moveUp.reversed()
-            let sequence = SKAction.sequence([moveUp, moveDown])
-            platform.run(SKAction.repeatForever(sequence))
-            
-            platforms.append(platform)
-            addChild(platform)
+            // Create chicken at correct starting position
+            chicken = ChickenSprite()
+            if let chicken = chicken {
+                chicken.position = level.playerStart
+                chicken.physicsBody?.categoryBitMask = chickenCategory
+                chicken.physicsBody?.collisionBitMask = platformCategory
+                chicken.physicsBody?.contactTestBitMask = platformCategory | flagCategory
+                
+                // Add constraint to keep chicken within level bounds
+                let xRange = SKRange(lowerLimit: 0, upperLimit: level.width)
+                let yRange = SKRange(lowerLimit: 0, upperLimit: level.height)
+                let chickenConstraint = SKConstraint.positionX(xRange, y: yRange)
+                chicken.constraints = [chickenConstraint]
+                
+                addChild(chicken)
+            }
         }
-    }
-    
-    private func createFlag() {
-        // Create a more visually appealing flag
-        let flagPole = SKShapeNode(rectOf: CGSize(width: 4, height: 80))
-        flagPole.fillColor = .gray
-        flagPole.strokeColor = .darkGray
-        flagPole.position = CGPoint(x: frame.width * 0.9, y: frame.height * 0.6)
         
-        let flagPath = CGMutablePath()
-        flagPath.move(to: CGPoint(x: 0, y: 0))
-        flagPath.addLine(to: CGPoint(x: 30, y: 15))
-        flagPath.addLine(to: CGPoint(x: 0, y: 30))
-        flagPath.closeSubpath()
-        
-        let flag = SKShapeNode(path: flagPath)
-        flag.fillColor = .yellow
-        flag.strokeColor = .orange
-        flag.position = CGPoint(x: 2, y: 25)
-        
-        // Add waving animation to flag
-        let wave = SKAction.sequence([
-            SKAction.scaleX(to: 1.1, duration: 0.5),
-            SKAction.scaleX(to: 1.0, duration: 0.5)
-        ])
-        flag.run(SKAction.repeatForever(wave))
-        
-        flagPole.addChild(flag)
-        flagPole.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 30, height: 80))
-        flagPole.physicsBody?.isDynamic = false
-        flagPole.physicsBody?.categoryBitMask = flagCategory
-        
-        self.flag = flagPole
-        addChild(flagPole)
+        setupUI()
     }
     
     private func setupUI() {
@@ -279,6 +123,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func update(_ currentTime: TimeInterval) {
         guard !isGameOver else { return }
         
+        // Update video background
+        videoBackground?.updateBackground(in: self)
+        
         if let chicken = chicken, let audioController = audioController {
             // Get movement values from audio controller
             let movement = audioController.getMovementValues()
@@ -299,9 +146,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             // Update camera
             updateCamera()
-            
-            // Update parallax background
-            updateParallaxBackground()
         }
     }
     
@@ -328,15 +172,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let newY = cameraNode.position.y + (targetY - cameraNode.position.y) * smoothing
         
         cameraNode.position = CGPoint(x: newX, y: newY)
-    }
-    
-    private func updateParallaxBackground() {
-        guard let camera = camera else { return }
-        
-        for (index, layer) in backgroundLayers.enumerated() {
-            let parallaxFactor = CGFloat(index + 1) * 0.2
-            layer.position.x = camera.position.x * parallaxFactor
-        }
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
