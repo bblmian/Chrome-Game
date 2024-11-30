@@ -1,5 +1,36 @@
 import SpriteKit
 import GameplayKit
+import AVFoundation
+
+// Import our custom modules
+@_exported import struct CoreGraphics.CGFloat
+@_exported import struct CoreGraphics.CGPoint
+@_exported import struct CoreGraphics.CGSize
+@_exported import struct CoreGraphics.CGRect
+
+// Forward declarations
+class Level {
+    let width: CGFloat
+    let height: CGFloat
+    var platforms: [Platform] = []
+    var flag: SKNode?
+    var playerStart: CGPoint
+    
+    init(width: CGFloat, height: CGFloat) {
+        self.width = width
+        self.height = height
+        self.playerStart = CGPoint(x: 100, y: height - 150)
+        generatePlatforms()
+        createFlag()
+    }
+    
+    func generatePlatforms() {}
+    func createFlag() {}
+}
+
+class VideoBackground: SKNode {
+    func updateBackground(in scene: SKScene) {}
+}
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     // Physics categories
