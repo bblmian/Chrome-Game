@@ -57,22 +57,24 @@ class AudioController: NSObject, ObservableObject {
         isProcessing = true
         let frameCount = UInt32(buffer.frameLength)
         
+        // Copy audio data to avoid sendable issues
+        let audioData = Array(UnsafeBufferPointer(start: channelData, count: Int(frameCount)))
+        
         processingQueue.async { [weak self] in
             guard let self = self else { return }
             
             // Calculate volume (RMS)
             var sumSquares: Float = 0.0
-            for i in 0..<Int(frameCount) {
-                let sample = channelData[i]
+            for sample in audioData {
                 sumSquares += sample * sample
             }
             let rms = sqrt(sumSquares / Float(frameCount))
             
             // Calculate pitch using zero-crossing rate
             var zeroCrossings: Int = 0
-            var prevSample: Float = channelData[0]
-            for i in 1..<Int(frameCount) {
-                let sample = channelData[i]
+            var prevSample = audioData[0]
+            for i in 1..<audioData.count {
+                let sample = audioData[i]
                 if (sample * prevSample) < 0 {
                     zeroCrossings += 1
                 }

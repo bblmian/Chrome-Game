@@ -147,7 +147,6 @@ class VideoBackground: SKNode {
     
     private func addVignetteEffect(in scene: SKScene) {
         let vignetteNode = SKShapeNode(rect: CGRect(origin: .zero, size: scene.size))
-        let center = CGPoint(x: scene.size.width/2, y: scene.size.height/2)
         let gradient = CAGradientLayer()
         gradient.type = .radial
         gradient.frame = CGRect(origin: .zero, size: scene.size)
