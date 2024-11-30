@@ -51,14 +51,19 @@ class AudioController: NSObject, ObservableObject {
     }
     
     private func processAudioBuffer(_ buffer: AVAudioPCMBuffer) {
-        guard !isProcessing,
-              let channelData = buffer.floatChannelData?[0] else { return }
-        
+        guard !isProcessing else { return }
         isProcessing = true
-        let frameCount = UInt32(buffer.frameLength)
         
-        // Copy audio data to avoid sendable issues
-        let audioData = Array(UnsafeBufferPointer(start: channelData, count: Int(frameCount)))
+        // Create a local copy of the audio data
+        let frameCount = Int(buffer.frameLength)
+        var audioData = [Float](repeating: 0, count: frameCount)
+        
+        // Safely copy the audio data
+        if let channelData = buffer.floatChannelData?[0] {
+            for i in 0..<frameCount {
+                audioData[i] = channelData[i]
+            }
+        }
         
         processingQueue.async { [weak self] in
             guard let self = self else { return }
