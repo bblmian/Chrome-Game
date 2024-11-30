@@ -7,53 +7,99 @@ struct ContentView: View {
     @State private var gameScene: GameScene?
     @State private var showingAudioPermissionAlert = false
     @State private var isGameStarted = false
+    @State private var isFullscreen = false
     
     var body: some View {
-        ZStack {
-            // Game Scene
-            if let scene = gameScene {
-                SpriteView(scene: scene)
-                    .ignoresSafeArea()
-            }
-            
-            // UI Overlay
-            VStack {
+        GeometryReader { geometry in
+            ZStack {
+                // Game Scene
+                if let scene = gameScene {
+                    SpriteView(scene: scene)
+                        .ignoresSafeArea()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                
+                // UI Overlay
                 if !isGameStarted {
+                    // Semi-transparent background
+                    Color.black.opacity(0.7)
+                        .ignoresSafeArea()
+                    
                     // Title and Start Screen
-                    VStack(spacing: 20) {
-                        Image(systemName: "bird.fill")
-                            .font(.system(size: 60))
-                            .foregroundColor(.yellow)
+                    VStack(spacing: 30) {
+                        // Game Logo
+                        VStack(spacing: 15) {
+                            Image(systemName: "bird.fill")
+                                .font(.system(size: 80))
+                                .foregroundColor(.yellow)
+                                .shadow(color: .orange, radius: 10, x: 0, y: 5)
+                            
+                            Text("小鸡闯关")
+                                .font(.system(size: 48, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                                .shadow(color: .orange, radius: 10)
+                        }
+                        .padding(.top, 50)
                         
-                        Text("小鸡闯关")
-                            .font(.largeTitle)
-                            .bold()
-                        
+                        // Start Button
                         Button(action: startGame) {
                             Text("开始游戏")
-                                .font(.title2)
-                                .bold()
+                                .font(.system(size: 24, weight: .bold, design: .rounded))
                                 .foregroundColor(.white)
-                                .padding()
-                                .background(Color.blue)
-                                .cornerRadius(10)
+                                .frame(width: 200, height: 60)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 30)
+                                        .fill(LinearGradient(
+                                            gradient: Gradient(colors: [.blue, .purple]),
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        ))
+                                        .shadow(color: .blue.opacity(0.5), radius: 10, x: 0, y: 5)
+                                )
                         }
                         
                         // Game Instructions
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("游戏说明:")
-                                .font(.headline)
-                            Text("• 发出声音向前移动 - 声音越大移动越快")
-                            Text("• 发出高音跳跃 - 音调越高跳得越高")
-                            Text("• 持续发声可以延长跳跃时间")
+                        VStack(alignment: .leading, spacing: 15) {
+                            Text("游戏说明")
+                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                                .padding(.bottom, 5)
+                            
+                            InstructionRow(icon: "waveform", text: "发出声音向前移动 - 声音越大移动越快")
+                            InstructionRow(icon: "arrow.up.circle", text: "发出高音跳跃 - 音调越高跳得越高")
+                            InstructionRow(icon: "arrow.up.and.down.circle", text: "持续发声可以延长跳跃时间")
                         }
-                        .padding()
-                        .background(Color.black.opacity(0.7))
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                        .padding(25)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.white.opacity(0.1))
+                                .shadow(color: .black.opacity(0.3), radius: 10)
+                        )
+                        .padding(.horizontal, 30)
+                        
+                        Spacer()
                     }
                 }
+                
+                // Fullscreen Toggle Button (always visible)
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button(action: toggleFullscreen) {
+                            Image(systemName: isFullscreen ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.white)
+                                .padding(15)
+                                .background(Color.black.opacity(0.5))
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.3), radius: 5)
+                        }
+                        .padding([.top, .trailing], 20)
+                    }
+                    Spacer()
+                }
             }
+            .statusBar(hidden: isFullscreen)
         }
         .onAppear {
             setupAudioSession()
@@ -90,10 +136,35 @@ struct ContentView: View {
     
     private func startGame() {
         let scene = GameScene(size: UIScreen.main.bounds.size)
-        scene.scaleMode = .aspectFill
+        scene.scaleMode = .resizeFill
         scene.audioController = audioController
         self.gameScene = scene
         isGameStarted = true
+    }
+    
+    private func toggleFullscreen() {
+        isFullscreen.toggle()
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            windowScene.windows.first?.overrideUserInterfaceStyle = isFullscreen ? .dark : .unspecified
+        }
+    }
+}
+
+struct InstructionRow: View {
+    let icon: String
+    let text: String
+    
+    var body: some View {
+        HStack(spacing: 15) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundColor(.yellow)
+                .frame(width: 30)
+            
+            Text(text)
+                .font(.system(size: 18, design: .rounded))
+                .foregroundColor(.white)
+        }
     }
 }
 

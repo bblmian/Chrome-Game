@@ -1,0 +1,62 @@
+{
+    "particleTexture" : {
+        "className" : "SKTexture",
+        "properties" : {
+            "size" : "{10, 10}"
+        }
+    },
+    "particleBirthRate" : 100,
+    "particleLifetime" : 2,
+    "particlePositionRange" : "{100, 100}",
+    "particleSpeed" : 200,
+    "particleSpeedRange" : 150,
+    "particleAlpha" : 1,
+    "particleAlphaRange" : 0,
+    "particleAlphaSpeed" : -0.5,
+    "particleScale" : 0.5,
+    "particleScaleRange" : 0.25,
+    "particleScaleSpeed" : -0.25,
+    "particleRotation" : 0,
+    "particleRotationRange" : 6.28,
+    "particleRotationSpeed" : 2,
+    "particleColorBlendFactor" : 1,
+    "particleColorBlendFactorRange" : 0,
+    "particleColorBlendFactorSpeed" : 0,
+    "particleColorSequence" : {
+        "className" : "SKKeyframeSequence",
+        "properties" : {
+            "keyframes" : [
+                {
+                    "time" : 0,
+                    "value" : [1, 1, 0, 1]
+                },
+                {
+                    "time" : 0.5,
+                    "value" : [1, 0.5, 0, 1]
+                },
+                {
+                    "time" : 1,
+                    "value" : [1, 0, 0, 1]
+                }
+            ],
+            "times" : [0, 0.5, 1]
+        }
+    },
+    "particleAction" : {
+        "className" : "SKAction",
+        "properties" : {
+            "sequence" : [
+                {
+                    "className" : "SKActionRotateBy",
+                    "properties" : {
+                        "angle" : 6.28,
+                        "duration" : 1
+                    }
+                }
+            ]
+        }
+    },
+    "particleBlendMode" : "add",
+    "yAcceleration" : -150,
+    "targetNode" : null
+}
