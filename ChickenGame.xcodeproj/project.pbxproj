@@ -1,336 +1,363 @@
 // !$*UTF8*$!
 {
-    archiveVersion = 1;
-    classes = {
-    };
-    objectVersion = 56;
-    objects = {
-        /* Begin PBXBuildFile section */
-        1A2B3C4D5E6F7G8H /* ChickenGameApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7G8I */;
-        1A2B3C4D5E6F7G8J /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7G8K */;
-        1A2B3C4D5E6F7G8L /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7G8M */;
-        1A2B3C4D5E6F7G8N /* AudioController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7G8O */;
-        1A2B3C4D5E6F7G8P /* ChickenSprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7G8Q */;
-        1A2B3C4D5E6F7G8R /* MovementController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7G8S */;
-        /* End PBXBuildFile section */
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
 
-        /* Begin PBXFileReference section */
-        1A2B3C4D5E6F7G8A /* ChickenGame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChickenGame.app; sourceTree = BUILT_PRODUCTS_DIR; };
-        1A2B3C4D5E6F7G8I /* ChickenGameApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChickenGameApp.swift; sourceTree = "<group>"; };
-        1A2B3C4D5E6F7G8K /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-        1A2B3C4D5E6F7G8M /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
-        1A2B3C4D5E6F7G8O /* AudioController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioController.swift; sourceTree = "<group>"; };
-        1A2B3C4D5E6F7G8Q /* ChickenSprite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChickenSprite.swift; sourceTree = "<group>"; };
-        1A2B3C4D5E6F7G8S /* MovementController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementController.swift; sourceTree = "<group>"; };
-        /* End PBXFileReference section */
+/* Begin PBXBuildFile section */
+		8A1B3C4D5E6F7G8H /* ChickenGameApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B3C4D5E6F7G8I /* ChickenGameApp.swift */; };
+		8A1B3C4D5E6F7G8J /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B3C4D5E6F7G8K /* ContentView.swift */; };
+		8A1B3C4D5E6F7G8L /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B3C4D5E6F7G8M /* GameScene.swift */; };
+		8A1B3C4D5E6F7G8N /* AudioController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B3C4D5E6F7G8O /* AudioController.swift */; };
+		8A1B3C4D5E6F7G8P /* ChickenSprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B3C4D5E6F7G8Q /* ChickenSprite.swift */; };
+		8A1B3C4D5E6F7G8R /* MovementController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B3C4D5E6F7G8S /* MovementController.swift */; };
+		8A1B3C4D5E6F7G8T /* Celebration.sks in Resources */ = {isa = PBXBuildFile; fileRef = 8A1B3C4D5E6F7G8U /* Celebration.sks */; };
+/* End PBXBuildFile section */
 
-        /* Begin PBXFrameworksBuildPhase section */
-        1A2B3C4D5E6F7G8T /* Frameworks */ = {
-            isa = PBXFrameworksBuildPhase;
-            buildActionMask = 2147483647;
-            files = (
-            );
-            runOnlyForDeploymentPostprocessing = 0;
-        };
-        /* End PBXFrameworksBuildPhase section */
+/* Begin PBXFileReference section */
+		8A1B3C4D5E6F7G8A /* ChickenGame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChickenGame.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8A1B3C4D5E6F7G8I /* ChickenGameApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChickenGameApp.swift; sourceTree = "<group>"; };
+		8A1B3C4D5E6F7G8K /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		8A1B3C4D5E6F7G8M /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
+		8A1B3C4D5E6F7G8O /* AudioController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioController.swift; sourceTree = "<group>"; };
+		8A1B3C4D5E6F7G8Q /* ChickenSprite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChickenSprite.swift; sourceTree = "<group>"; };
+		8A1B3C4D5E6F7G8S /* MovementController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementController.swift; sourceTree = "<group>"; };
+		8A1B3C4D5E6F7G8U /* Celebration.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Celebration.sks; sourceTree = "<group>"; };
+		8A1B3C4D5E6F7G8V /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
 
-        /* Begin PBXGroup section */
-        1A2B3C4D5E6F7G8U /* Products */ = {
-            isa = PBXGroup;
-            children = (
-                1A2B3C4D5E6F7G8A /* ChickenGame.app */,
-            );
-            name = Products;
-            sourceTree = "<group>";
-        };
-        1A2B3C4D5E6F7G8V /* ChickenGame */ = {
-            isa = PBXGroup;
-            children = (
-                1A2B3C4D5E6F7G8I /* ChickenGameApp.swift */,
-                1A2B3C4D5E6F7G8K /* ContentView.swift */,
-                1A2B3C4D5E6F7G8M /* GameScene.swift */,
-                1A2B3C4D5E6F7G8O /* AudioController.swift */,
-                1A2B3C4D5E6F7G8Q /* ChickenSprite.swift */,
-                1A2B3C4D5E6F7G8S /* MovementController.swift */,
-            );
-            path = ChickenGame;
-            sourceTree = "<group>";
-        };
-        /* End PBXGroup section */
+/* Begin PBXFrameworksBuildPhase section */
+		8A1B3C4D5E6F7G8W /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
-        /* Begin PBXNativeTarget section */
-        1A2B3C4D5E6F7G8W /* ChickenGame */ = {
-            isa = PBXNativeTarget;
-            buildConfigurationList = 1A2B3C4D5E6F7G8X;
-            buildPhases = (
-                1A2B3C4D5E6F7G8T /* Frameworks */,
-                1A2B3C4D5E6F7G8Y /* Sources */,
-                1A2B3C4D5E6F7G8Z /* Resources */,
-            );
-            buildRules = (
-            );
-            dependencies = (
-            );
-            name = ChickenGame;
-            productName = ChickenGame;
-            productReference = 1A2B3C4D5E6F7G8A /* ChickenGame.app */;
-            productType = "com.apple.product-type.application";
-        };
-        /* End PBXNativeTarget section */
+/* Begin PBXGroup section */
+		8A1B3C4D5E6F7G8X /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8A1B3C4D5E6F7G8A /* ChickenGame.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8A1B3C4D5E6F7G8Y /* ChickenGame */ = {
+			isa = PBXGroup;
+			children = (
+				8A1B3C4D5E6F7G8I /* ChickenGameApp.swift */,
+				8A1B3C4D5E6F7G8K /* ContentView.swift */,
+				8A1B3C4D5E6F7G8M /* GameScene.swift */,
+				8A1B3C4D5E6F7G8O /* AudioController.swift */,
+				8A1B3C4D5E6F7G8Q /* ChickenSprite.swift */,
+				8A1B3C4D5E6F7G8S /* MovementController.swift */,
+				8A1B3C4D5E6F7G8U /* Celebration.sks */,
+				8A1B3C4D5E6F7G8V /* Info.plist */,
+			);
+			path = ChickenGame;
+			sourceTree = "<group>";
+		};
+		8A1B3C4D5E6F7G8Z /* Project */ = {
+			isa = PBXGroup;
+			children = (
+				8A1B3C4D5E6F7G8X /* Products */,
+				8A1B3C4D5E6F7G8Y /* ChickenGame */,
+			);
+			name = Project;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
 
-        /* Begin PBXProject section */
-        1A2B3C4D5E6F7G90 /* Project object */ = {
-            isa = PBXProject;
-            attributes = {
-                BuildIndependentTargetsInParallel = 1;
-                LastSwiftUpdateCheck = 1500;
-                LastUpgradeCheck = 1500;
-                TargetAttributes = {
-                    1A2B3C4D5E6F7G8W = {
-                        CreatedOnToolsVersion = 15.0;
-                    };
-                };
-            };
-            buildConfigurationList = 1A2B3C4D5E6F7G91;
-            compatibilityVersion = "Xcode 14.0";
-            developmentRegion = en;
-            hasScannedForEncodings = 0;
-            knownRegions = (
-                en,
-                Base,
-            );
-            mainGroup = 1A2B3C4D5E6F7G8V;
-            productRefGroup = 1A2B3C4D5E6F7G8U /* Products */;
-            projectDirPath = "";
-            projectRoot = "";
-            targets = (
-                1A2B3C4D5E6F7G8W /* ChickenGame */,
-            );
-        };
-        /* End PBXProject section */
+/* Begin PBXNativeTarget section */
+		8A1B3C4D5E6F7G90 /* ChickenGame */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8A1B3C4D5E6F7G91 /* Build configuration list for PBXNativeTarget "ChickenGame" */;
+			buildPhases = (
+				8A1B3C4D5E6F7G92 /* Sources */,
+				8A1B3C4D5E6F7G8W /* Frameworks */,
+				8A1B3C4D5E6F7G93 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ChickenGame;
+			productName = ChickenGame;
+			productReference = 8A1B3C4D5E6F7G8A /* ChickenGame.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
 
-        /* Begin PBXResourcesBuildPhase section */
-        1A2B3C4D5E6F7G8Z /* Resources */ = {
-            isa = PBXResourcesBuildPhase;
-            buildActionMask = 2147483647;
-            files = (
-            );
-            runOnlyForDeploymentPostprocessing = 0;
-        };
-        /* End PBXResourcesBuildPhase section */
+/* Begin PBXProject section */
+		8A1B3C4D5E6F7G94 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1610;
+				LastUpgradeCheck = 1610;
+				TargetAttributes = {
+					8A1B3C4D5E6F7G90 = {
+						CreatedOnToolsVersion = 16.1;
+					};
+				};
+			};
+			buildConfigurationList = 8A1B3C4D5E6F7G95 /* Build configuration list for PBXProject "ChickenGame" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 8A1B3C4D5E6F7G8Z /* Project */;
+			productRefGroup = 8A1B3C4D5E6F7G8X /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8A1B3C4D5E6F7G90 /* ChickenGame */,
+			);
+		};
+/* End PBXProject section */
 
-        /* Begin PBXSourcesBuildPhase section */
-        1A2B3C4D5E6F7G8Y /* Sources */ = {
-            isa = PBXSourcesBuildPhase;
-            buildActionMask = 2147483647;
-            files = (
-                1A2B3C4D5E6F7G8D /* ChickenGameApp.swift in Sources */,
-                1A2B3C4D5E6F7G8J /* ContentView.swift in Sources */,
-                1A2B3C4D5E6F7G8L /* GameScene.swift in Sources */,
-                1A2B3C4D5E6F7G8N /* AudioController.swift in Sources */,
-                1A2B3C4D5E6F7G8P /* ChickenSprite.swift in Sources */,
-                1A2B3C4D5E6F7G8R /* MovementController.swift in Sources */,
-            );
-            runOnlyForDeploymentPostprocessing = 0;
-        };
-        /* End PBXSourcesBuildPhase section */
+/* Begin PBXResourcesBuildPhase section */
+		8A1B3C4D5E6F7G93 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8A1B3C4D5E6F7G8T /* Celebration.sks in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
-        /* Begin XCBuildConfiguration section */
-        1A2B3C4D5E6F7G92 /* Debug */ = {
-            isa = XCBuildConfiguration;
-            buildSettings = {
-                ALWAYS_SEARCH_USER_PATHS = NO;
-                ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-                CLANG_ANALYZER_NONNULL = YES;
-                CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-                CLANG_ENABLE_MODULES = YES;
-                CLANG_ENABLE_OBJC_ARC = YES;
-                CLANG_ENABLE_OBJC_WEAK = YES;
-                CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-                CLANG_WARN_BOOL_CONVERSION = YES;
-                CLANG_WARN_COMMA = YES;
-                CLANG_WARN_CONSTANT_CONVERSION = YES;
-                CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-                CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-                CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-                CLANG_WARN_EMPTY_BODY = YES;
-                CLANG_WARN_ENUM_CONVERSION = YES;
-                CLANG_WARN_INFINITE_RECURSION = YES;
-                CLANG_WARN_INT_CONVERSION = YES;
-                CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-                CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-                CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-                CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-                CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-                CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-                CLANG_WARN_STRICT_PROTOTYPES = YES;
-                CLANG_WARN_SUSPICIOUS_MOVE = YES;
-                CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-                CLANG_WARN_UNREACHABLE_CODE = YES;
-                CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-                COPY_PHASE_STRIP = NO;
-                DEBUG_INFORMATION_FORMAT = dwarf;
-                ENABLE_STRICT_OBJC_MSGSEND = YES;
-                ENABLE_TESTABILITY = YES;
-                ENABLE_USER_SCRIPT_SANDBOXING = YES;
-                GCC_C_LANGUAGE_STANDARD = gnu17;
-                GCC_DYNAMIC_NO_PIC = NO;
-                GCC_NO_COMMON_BLOCKS = YES;
-                GCC_OPTIMIZATION_LEVEL = 0;
-                GCC_PREPROCESSOR_DEFINITIONS = (
-                    "DEBUG=1",
-                    "$(inherited)",
-                );
-                GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-                GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-                GCC_WARN_UNDECLARED_SELECTOR = YES;
-                GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-                GCC_WARN_UNUSED_FUNCTION = YES;
-                GCC_WARN_UNUSED_VARIABLE = YES;
-                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-                LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-                MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-                MTL_FAST_MATH = YES;
-                ONLY_ACTIVE_ARCH = YES;
-                SDKROOT = iphoneos;
-                SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-                SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-            };
-            name = Debug;
-        };
-        1A2B3C4D5E6F7G93 /* Release */ = {
-            isa = XCBuildConfiguration;
-            buildSettings = {
-                ALWAYS_SEARCH_USER_PATHS = NO;
-                ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-                CLANG_ANALYZER_NONNULL = YES;
-                CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-                CLANG_ENABLE_MODULES = YES;
-                CLANG_ENABLE_OBJC_ARC = YES;
-                CLANG_ENABLE_OBJC_WEAK = YES;
-                CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-                CLANG_WARN_BOOL_CONVERSION = YES;
-                CLANG_WARN_COMMA = YES;
-                CLANG_WARN_CONSTANT_CONVERSION = YES;
-                CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-                CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-                CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-                CLANG_WARN_EMPTY_BODY = YES;
-                CLANG_WARN_ENUM_CONVERSION = YES;
-                CLANG_WARN_INFINITE_RECURSION = YES;
-                CLANG_WARN_INT_CONVERSION = YES;
-                CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-                CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-                CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-                CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-                CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-                CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-                CLANG_WARN_STRICT_PROTOTYPES = YES;
-                CLANG_WARN_SUSPICIOUS_MOVE = YES;
-                CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-                CLANG_WARN_UNREACHABLE_CODE = YES;
-                CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-                COPY_PHASE_STRIP = NO;
-                DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-                ENABLE_NS_ASSERTIONS = NO;
-                ENABLE_STRICT_OBJC_MSGSEND = YES;
-                ENABLE_USER_SCRIPT_SANDBOXING = YES;
-                GCC_C_LANGUAGE_STANDARD = gnu17;
-                GCC_NO_COMMON_BLOCKS = YES;
-                GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-                GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-                GCC_WARN_UNDECLARED_SELECTOR = YES;
-                GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-                GCC_WARN_UNUSED_FUNCTION = YES;
-                GCC_WARN_UNUSED_VARIABLE = YES;
-                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-                LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-                MTL_ENABLE_DEBUG_INFO = NO;
-                MTL_FAST_MATH = YES;
-                SDKROOT = iphoneos;
-                SWIFT_COMPILATION_MODE = wholemodule;
-                VALIDATE_PRODUCT = YES;
-            };
-            name = Release;
-        };
-        1A2B3C4D5E6F7G94 /* Debug */ = {
-            isa = XCBuildConfiguration;
-            buildSettings = {
-                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-                ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-                CODE_SIGN_STYLE = Automatic;
-                CURRENT_PROJECT_VERSION = 1;
-                DEVELOPMENT_ASSET_PATHS = "\"ChickenGame/Preview Content\"";
-                ENABLE_PREVIEWS = YES;
-                GENERATE_INFOPLIST_FILE = YES;
-                INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要使用麦克风来控制游戏";
-                INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-                INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-                INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-                INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationLandscapeRight;
-                LD_RUNPATH_SEARCH_PATHS = (
-                    "$(inherited)",
-                    "@executable_path/Frameworks",
-                );
-                MARKETING_VERSION = 1.0;
-                PRODUCT_BUNDLE_IDENTIFIER = com.example.ChickenGame;
-                PRODUCT_NAME = "$(TARGET_NAME)";
-                SWIFT_EMIT_LOC_STRINGS = YES;
-                SWIFT_VERSION = 5.0;
-                TARGETED_DEVICE_FAMILY = "1,2";
-            };
-            name = Debug;
-        };
-        1A2B3C4D5E6F7G95 /* Release */ = {
-            isa = XCBuildConfiguration;
-            buildSettings = {
-                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-                ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-                CODE_SIGN_STYLE = Automatic;
-                CURRENT_PROJECT_VERSION = 1;
-                DEVELOPMENT_ASSET_PATHS = "\"ChickenGame/Preview Content\"";
-                ENABLE_PREVIEWS = YES;
-                GENERATE_INFOPLIST_FILE = YES;
-                INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要使用麦克风来控制游戏";
-                INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-                INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-                INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-                INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationLandscapeRight;
-                LD_RUNPATH_SEARCH_PATHS = (
-                    "$(inherited)",
-                    "@executable_path/Frameworks",
-                );
-                MARKETING_VERSION = 1.0;
-                PRODUCT_BUNDLE_IDENTIFIER = com.example.ChickenGame;
-                PRODUCT_NAME = "$(TARGET_NAME)";
-                SWIFT_EMIT_LOC_STRINGS = YES;
-                SWIFT_VERSION = 5.0;
-                TARGETED_DEVICE_FAMILY = "1,2";
-            };
-            name = Release;
-        };
-        /* End XCBuildConfiguration section */
+/* Begin PBXSourcesBuildPhase section */
+		8A1B3C4D5E6F7G92 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8A1B3C4D5E6F7G8H /* ChickenGameApp.swift in Sources */,
+				8A1B3C4D5E6F7G8J /* ContentView.swift in Sources */,
+				8A1B3C4D5E6F7G8L /* GameScene.swift in Sources */,
+				8A1B3C4D5E6F7G8N /* AudioController.swift in Sources */,
+				8A1B3C4D5E6F7G8P /* ChickenSprite.swift in Sources */,
+				8A1B3C4D5E6F7G8R /* MovementController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
 
-        /* Begin XCConfigurationList section */
-        1A2B3C4D5E6F7G91 /* Build configuration list for PBXProject "ChickenGame" */ = {
-            isa = XCConfigurationList;
-            buildConfigurations = (
-                1A2B3C4D5E6F7G92 /* Debug */,
-                1A2B3C4D5E6F7G93 /* Release */,
-            );
-            defaultConfigurationIsVisible = 0;
-            defaultConfigurationName = Release;
-        };
-        1A2B3C4D5E6F7G8X /* Build configuration list for PBXNativeTarget "ChickenGame" */ = {
-            isa = XCConfigurationList;
-            buildConfigurations = (
-                1A2B3C4D5E6F7G94 /* Debug */,
-                1A2B3C4D5E6F7G95 /* Release */,
-            );
-            defaultConfigurationIsVisible = 0;
-            defaultConfigurationName = Release;
-        };
-        /* End XCConfigurationList section */
-    };
-    rootObject = 1A2B3C4D5E6F7G90 /* Project object */;
+/* Begin XCBuildConfiguration section */
+		8A1B3C4D5E6F7G96 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		8A1B3C4D5E6F7G97 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8A1B3C4D5E6F7G98 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"ChickenGame/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ChickenGame/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要使用麦克风来控制游戏";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ChickenGame;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8A1B3C4D5E6F7G99 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"ChickenGame/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ChickenGame/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要使用麦克风来控制游戏";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.ChickenGame;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8A1B3C4D5E6F7G91 /* Build configuration list for PBXNativeTarget "ChickenGame" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8A1B3C4D5E6F7G98 /* Debug */,
+				8A1B3C4D5E6F7G99 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8A1B3C4D5E6F7G95 /* Build configuration list for PBXProject "ChickenGame" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8A1B3C4D5E6F7G96 /* Debug */,
+				8A1B3C4D5E6F7G97 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 8A1B3C4D5E6F7G94 /* Project object */;
 }
