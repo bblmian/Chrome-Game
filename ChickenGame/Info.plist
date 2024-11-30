@@ -22,6 +22,8 @@
     <true/>
     <key>NSMicrophoneUsageDescription</key>
     <string>需要使用麦克风来控制游戏</string>
+    <key>NSCameraUsageDescription</key>
+    <string>需要使用摄像头来显示游戏背景</string>
     <key>UIApplicationSceneManifest</key>
     <dict>
         <key>UIApplicationSupportsMultipleScenes</key>
